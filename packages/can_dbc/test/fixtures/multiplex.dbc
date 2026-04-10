@@ -1,0 +1,22 @@
+VERSION ""
+
+NS_ :
+
+BS_:
+
+BU_: Sender Receiver
+
+BO_ 400 MultiplexedMsg: 8 Sender
+ SG_ MuxSelector M : 0|4@1+ (1,0) [0|15] "" Receiver
+ SG_ Signal_0 m0 : 8|8@1+ (1,0) [0|255] "" Receiver
+ SG_ Signal_1 m1 : 8|16@1+ (0.1,0) [0|6553.5] "rpm" Receiver
+ SG_ Signal_2 m2 : 8|8@1+ (0.5,-20) [-20|107.5] "degC" Receiver
+ SG_ CommonSignal : 32|16@1+ (1,0) [0|65535] "" Receiver
+
+BO_ 500 SimpleMsg: 2 Sender
+ SG_ Counter : 0|8@1+ (1,0) [0|255] "" Receiver
+ SG_ Status : 8|4@1+ (1,0) [0|15] "" Receiver
+
+CM_ BO_ 400 "Multiplexed message with 3 signal groups";
+CM_ SG_ 400 MuxSelector "Selects which signal group is active";
+

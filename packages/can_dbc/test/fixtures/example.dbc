@@ -1,0 +1,34 @@
+VERSION "1.0"
+
+NS_ :
+
+BS_:
+
+BU_: ECU1 ECU2 Diag
+
+BO_ 100 EngineData: 8 ECU1
+ SG_ EngineSpeed : 0|16@1+ (0.25,0) [0|16383.75] "rpm" ECU2
+ SG_ EngineTemp : 16|8@1- (1,-40) [-40|215] "degC" ECU2
+ SG_ IdleRunning : 24|1@1+ (1,0) [0|1] "" ECU2
+ SG_ EngineLoad : 32|8@1+ (0.392157,0) [0|100] "%" ECU2
+
+BO_ 200 TransmissionData: 4 ECU1
+ SG_ GearPosition : 0|3@1+ (1,0) [0|7] "" ECU2
+ SG_ VehicleSpeed : 8|16@1+ (0.01,0) [0|655.35] "km/h" ECU2
+
+BO_ 300 BrakeData: 8 ECU2
+ SG_ BrakePedal : 0|8@1+ (0.392157,0) [0|100] "%" ECU1
+ SG_ BrakeForce : 8|16@1+ (1,0) [0|65535] "N" ECU1
+ SG_ ABSActive : 24|1@1+ (1,0) [0|1] "" ECU1
+ SG_ ESPActive : 25|1@1+ (1,0) [0|1] "" ECU1
+
+CM_ BU_ ECU1 "Engine Control Unit";
+CM_ BU_ ECU2 "Transmission Control Unit";
+CM_ BO_ 100 "Engine parameters at 100ms cycle time";
+CM_ SG_ 100 EngineSpeed "Current engine speed in rpm";
+CM_ SG_ 100 EngineTemp "Coolant temperature in degrees Celsius";
+CM_ SG_ 200 VehicleSpeed "Current vehicle speed";
+
+VAL_ 100 IdleRunning 0 "Running" 1 "Idle" ;
+VAL_ 200 GearPosition 0 "Neutral" 1 "First" 2 "Second" 3 "Third" 4 "Fourth" 5 "Fifth" 6 "Sixth" 7 "Reverse" ;
+

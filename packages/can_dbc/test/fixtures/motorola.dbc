@@ -1,0 +1,25 @@
+VERSION ""
+
+NS_ :
+
+BS_:
+
+BU_: Node1 Node2
+
+BO_ 600 MotorolaMsg: 8 Node1
+ SG_ BigEndian16 : 7|16@0+ (1,0) [0|65535] "" Node2
+ SG_ BigEndian8 : 23|8@0+ (0.5,0) [0|127.5] "V" Node2
+ SG_ BigEndianSigned : 39|12@0- (0.1,-204.8) [-204.8|204.7] "A" Node2
+
+BO_ 601 IntelMsg: 8 Node1
+ SG_ LittleEndian16 : 0|16@1+ (1,0) [0|65535] "" Node2
+ SG_ LittleEndian8 : 16|8@1+ (0.5,0) [0|127.5] "V" Node2
+ SG_ LittleEndianSigned : 24|12@1- (0.1,-204.8) [-204.8|204.7] "A" Node2
+
+BO_ 2147484160 ExtendedMsg: 8 Node1
+ SG_ ExtSignal : 0|32@1+ (1,0) [0|4294967295] "" Node2
+
+CM_ BO_ 600 "Message with Motorola (big-endian) byte order signals";
+CM_ BO_ 601 "Message with Intel (little-endian) byte order signals";
+CM_ BO_ 2147484160 "Extended frame format message (29-bit ID)";
+
