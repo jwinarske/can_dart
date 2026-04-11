@@ -110,8 +110,22 @@ class DbcParser {
   void _parseNs() {
     _expectKeyword('NS_');
     _skip(TokenType.colon);
-    // Skip all identifiers until next keyword or EOF
-    while (!_isAtEnd && _current.type == TokenType.identifier) {
+    // The NS_ section is a list of optional-symbol names (NS_DESC_, CM_,
+    // BA_DEF_, VAL_, SG_MUL_VAL_, ...). Many of these names are also in
+    // the tokenizer's keyword set, so naively skipping only identifiers
+    // would leave them in the stream and _parseSection would mis-dispatch
+    // them as real sections (e.g. CM_ would be parsed as a comment and
+    // silently consume everything up to the next semicolon).
+    //
+    // Skip every token until we reach the start of the next real section.
+    // BS_ (bus speed), BU_ (nodes), and BO_ (message) are the only three
+    // section starters that can never legitimately appear inside an NS_
+    // symbol list, so they are safe stop sentinels.
+    while (!_isAtEnd) {
+      if (_current.type == TokenType.keyword) {
+        final v = _current.value;
+        if (v == 'BS_' || v == 'BU_' || v == 'BO_') break;
+      }
       _advance();
     }
   }
@@ -189,6 +203,13 @@ class DbcParser {
       final muxStr = _current.value;
       if (muxStr == 'M') {
         muxType = MultiplexType.multiplexer;
+        _advance();
+      } else if (muxStr == 'm') {
+        // Bare "m" (no explicit value) — a multiplexed signal whose
+        // selector value is defined elsewhere via SG_MUL_VAL_ extended
+        // multiplexing. Cantools accepts this and it appears in
+        // real-world DBC files (e.g. vw_pq.dbc in opendbc).
+        muxType = MultiplexType.multiplexed;
         _advance();
       } else if (muxStr.startsWith('m') && muxStr.length > 1) {
         final numPart = muxStr.substring(1);

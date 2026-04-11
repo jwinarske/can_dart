@@ -142,7 +142,8 @@ class DbcTokenizer {
     final start = _pos;
     var isFloat = false;
 
-    if (_source[_pos] == '-' || _source[_pos] == '+') _advance();
+    final hadSign = _source[_pos] == '-' || _source[_pos] == '+';
+    if (hadSign) _advance();
 
     while (_pos < _source.length && _isDigit(_source[_pos])) {
       _advance();
@@ -166,6 +167,20 @@ class DbcTokenizer {
       while (_pos < _source.length && _isDigit(_source[_pos])) {
         _advance();
       }
+    }
+
+    // If what we just read is immediately followed by an identifier-start
+    // character (letter or underscore), this was never a number — it is
+    // an identifier that happens to start with a digit. Real-world DBC
+    // files allow names like "2017_5" (message) or "0_COUNTER" (signal),
+    // and cantools tolerates them. Rewind and re-tokenize as identifier.
+    // Only applies to unsigned integer literals; a signed or fractional
+    // literal followed by letters is a genuine malformation.
+    if (!hadSign && !isFloat &&
+        _pos < _source.length && _isIdentStart(_source[_pos])) {
+      _pos = start;
+      _col = startCol;
+      return _readIdentifier();
     }
 
     final value = _source.substring(start, _pos);

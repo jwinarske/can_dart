@@ -281,5 +281,102 @@ BO_ 100 Msg: 8 Sender
       final sig = db.messages.first.signals.first;
       expect(sig.length, 1);
     });
+
+    test('accepts message and signal names starting with a digit', () {
+      // Real-world DBC files (e.g. mazda_2017.dbc's "2017_5" message and
+      // psa_aee2010_r3.dbc's "0_COUNTER" signal in opendbc) contain names
+      // that begin with a digit. Cantools accepts these; the tokenizer
+      // must too.
+      final db = DbcParser().parse('''
+VERSION ""
+BO_ 1275 2017_5: 8 XXX
+ SG_ 0_COUNTER : 4|5@0+ (1,0) [0|255] "" XXX
+''');
+      expect(db.messages.length, 1);
+      final msg = db.messages.first;
+      expect(msg.name, '2017_5');
+      expect(msg.id, 1275);
+      expect(msg.signals.length, 1);
+      expect(msg.signals.first.name, '0_COUNTER');
+    });
+
+    test('accepts bare "m" multiplexer indicator', () {
+      // vw_pq.dbc in opendbc uses bare "m" (no value) for signals whose
+      // selector value is defined elsewhere via SG_MUL_VAL_ extended
+      // multiplexing. Modelled as multiplexed with a null multiplexValue.
+      final db = DbcParser().parse('''
+VERSION ""
+BO_ 648 Motor_2: 8 Motor
+ SG_ MO2_Mp_Code m : 6|2@1+ (1,0) [0|3] "" Gateway
+ SG_ MO2_Getr_Code m2 : 0|6@1+ (1,0) [0|63] "" Gateway
+''');
+      final msg = db.messages.first;
+      final bareM = msg.signals.firstWhere((s) => s.name == 'MO2_Mp_Code');
+      expect(bareM.multiplexType, MultiplexType.multiplexed);
+      expect(bareM.multiplexValue, isNull);
+
+      final m2 = msg.signals.firstWhere((s) => s.name == 'MO2_Getr_Code');
+      expect(m2.multiplexType, MultiplexType.multiplexed);
+      expect(m2.multiplexValue, 2);
+    });
+
+    test('skips canonical NS_ symbol list without mis-dispatching CM_', () {
+      // Real-world DBC files exported from Vector CANdb++ emit an NS_
+      // section listing every optional symbol the DBC spec defines. Many
+      // of those names (NS_DESC_, CM_, BA_DEF_, BA_, VAL_, VAL_TABLE_,
+      // BA_DEF_DEF_, SG_MUL_VAL_, SIG_GROUP_, SIG_VALTYPE_, BO_TX_BU_)
+      // collide with section starters. A buggy NS_ skipper would return
+      // control to the dispatcher mid-list, which would then parse "CM_"
+      // as a comment section and consume the BU_/BO_ lines that follow
+      // it up to the first semicolon.
+      final db = DbcParser().parse('''
+VERSION ""
+
+
+NS_ :
+\tNS_DESC_
+\tCM_
+\tBA_DEF_
+\tBA_
+\tVAL_
+\tCAT_DEF_
+\tCAT_
+\tFILTER
+\tBA_DEF_DEF_
+\tEV_DATA_
+\tENVVAR_DATA_
+\tSGTYPE_
+\tSGTYPE_VAL_
+\tBA_DEF_SGTYPE_
+\tBA_SGTYPE_
+\tSIG_TYPE_REF_
+\tVAL_TABLE_
+\tSIG_GROUP_
+\tSIG_VALTYPE_
+\tSIGTYPE_VALTYPE_
+\tBO_TX_BU_
+\tBA_DEF_REL_
+\tBA_REL_
+\tBA_DEF_DEF_REL_
+\tBU_SG_REL_
+\tBU_EV_REL_
+\tBU_BO_REL_
+\tSG_MUL_VAL_
+
+BS_:
+
+BU_: Vector_XXX
+VAL_TABLE_ SNA_8bit 255 "SNA" ;
+
+BO_ 100 TestMsg: 1 Vector_XXX
+ SG_ TestSig : 0|8@1+ (1,0) [0|255] "-" Vector_XXX
+
+''');
+      expect(db.nodes.length, 1);
+      expect(db.nodes.first.name, 'Vector_XXX');
+      expect(db.messages.length, 1);
+      expect(db.messages.first.name, 'TestMsg');
+      expect(db.messages.first.signals.first.name, 'TestSig');
+    });
   });
 }
