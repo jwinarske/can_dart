@@ -1,0 +1,14 @@
+CAN Dart
+Copyright 2024 CAN Dart Contributors
+
+This product includes software developed by third parties:
+
+Standalone Asio (https://think-async.com/Asio/)
+  Copyright (c) 2003-2024 Christopher M. Kohlhoff
+  Licensed under the Boost Software License, Version 1.0
+  (https://www.boost.org/LICENSE_1_0.txt)
+
+Glaze (https://github.com/stephenberry/glaze)
+  Copyright (c) 2023 Stephen Berry
+  Licensed under the MIT License
+  (https://opensource.org/licenses/MIT)

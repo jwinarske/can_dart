@@ -5,7 +5,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <linux/can.h>
+#include <linux/can/isotp.h>
 #include <linux/can/raw.h>
+#include <poll.h>
 
 #include <algorithm>
 #include <chrono>
@@ -82,6 +84,8 @@ void Engine::stop() {
     if (io_thread_.joinable()) {
         io_thread_.join();
     }
+
+    isotp_close();
 
     can_stream_.reset();
     if (sock_fd_ >= 0) {
@@ -606,6 +610,97 @@ void Engine::format_frame_text(uint32_t can_id, const uint8_t* data,
     format_hex(data, dlc, hex, sizeof(hex));
     std::snprintf(out, out_len, "%10.6f  %03X  [%u]  %s",
                  ts_sec, can_id, dlc, hex);
+}
+
+// ── ISO-TP (ISO 15765-2) ──
+
+int Engine::isotp_open(uint32_t tx_id, uint32_t rx_id) {
+    if (isotp_fd_ >= 0) {
+        // Already open — close first
+        isotp_close();
+    }
+
+    if (interface_name_.empty()) {
+        std::snprintf(snapshot_.error_msg, sizeof(snapshot_.error_msg),
+                     "isotp_open: engine not started");
+        return -1;
+    }
+
+    int fd = ::socket(AF_CAN, SOCK_DGRAM, CAN_ISOTP);
+    if (fd < 0) {
+        std::snprintf(snapshot_.error_msg, sizeof(snapshot_.error_msg),
+                     "isotp socket() failed: %s", strerror(errno));
+        return -1;
+    }
+
+    struct ifreq ifr{};
+    std::strncpy(ifr.ifr_name, interface_name_.c_str(), IFNAMSIZ - 1);
+    if (ioctl(fd, SIOCGIFINDEX, &ifr) < 0) {
+        std::snprintf(snapshot_.error_msg, sizeof(snapshot_.error_msg),
+                     "isotp ioctl(SIOCGIFINDEX) failed: %s", strerror(errno));
+        ::close(fd);
+        return -1;
+    }
+
+    struct sockaddr_can addr{};
+    addr.can_family = AF_CAN;
+    addr.can_ifindex = ifr.ifr_ifindex;
+    addr.can_addr.tp.tx_id = tx_id;
+    addr.can_addr.tp.rx_id = rx_id;
+
+    if (::bind(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
+        std::snprintf(snapshot_.error_msg, sizeof(snapshot_.error_msg),
+                     "isotp bind() failed: %s", strerror(errno));
+        ::close(fd);
+        return -1;
+    }
+
+    isotp_fd_ = fd;
+    return 0;
+}
+
+void Engine::isotp_close() {
+    if (isotp_fd_ >= 0) {
+        ::close(isotp_fd_);
+        isotp_fd_ = -1;
+    }
+}
+
+int Engine::isotp_send(const uint8_t* data, uint32_t len) {
+    if (isotp_fd_ < 0) return -1;
+
+    ssize_t ret = ::write(isotp_fd_, data, len);
+    if (ret < 0) {
+        std::snprintf(snapshot_.error_msg, sizeof(snapshot_.error_msg),
+                     "isotp write() failed: %s", strerror(errno));
+        return -1;
+    }
+    return static_cast<int>(ret);
+}
+
+int Engine::isotp_recv(uint8_t* buf, uint32_t buf_len, int timeout_ms) {
+    if (isotp_fd_ < 0) return -1;
+
+    if (timeout_ms >= 0) {
+        struct pollfd pfd{};
+        pfd.fd = isotp_fd_;
+        pfd.events = POLLIN;
+        int ret = ::poll(&pfd, 1, timeout_ms);
+        if (ret < 0) {
+            std::snprintf(snapshot_.error_msg, sizeof(snapshot_.error_msg),
+                         "isotp poll() failed: %s", strerror(errno));
+            return -1;
+        }
+        if (ret == 0) return 0; // timeout
+    }
+
+    ssize_t ret = ::read(isotp_fd_, buf, buf_len);
+    if (ret < 0) {
+        std::snprintf(snapshot_.error_msg, sizeof(snapshot_.error_msg),
+                     "isotp read() failed: %s", strerror(errno));
+        return -1;
+    }
+    return static_cast<int>(ret);
 }
 
 } // namespace can_engine

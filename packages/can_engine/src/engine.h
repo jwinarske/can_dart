@@ -2,6 +2,7 @@
 
 #include <asio.hpp>
 #include <linux/can.h>
+#include <linux/can/isotp.h>
 #include <linux/can/raw.h>
 
 #include <cstdint>
@@ -70,6 +71,12 @@ public:
     void set_display_filter(const uint32_t* pass_ids, uint32_t count);
     void clear_display_filter();
 
+    // ISO-TP (ISO 15765-2)
+    int  isotp_open(uint32_t tx_id, uint32_t rx_id);
+    void isotp_close();
+    int  isotp_send(const uint8_t* data, uint32_t len);
+    int  isotp_recv(uint8_t* buf, uint32_t buf_len, int timeout_ms);
+
 private:
     // Asio
     asio::io_context               io_ctx_;
@@ -80,6 +87,7 @@ private:
 
     // Socket
     int sock_fd_{-1};
+    int isotp_fd_{-1};
     std::string interface_name_;
 
     // THE frame buffer — read() writes here, everything reads from here

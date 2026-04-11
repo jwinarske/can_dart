@@ -1,0 +1,23 @@
+name: obdii_monitor
+description: OBD-II vehicle diagnostics app using can_engine zero-copy pipeline.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  can_engine:
+    path: ../../packages/can_engine
+  can_dbc:
+    path: ../../packages/can_dbc
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

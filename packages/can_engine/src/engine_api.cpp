@@ -128,3 +128,25 @@ void engine_set_display_filter(can_engine_t* e,
 void engine_clear_display_filter(can_engine_t* e) {
     if (e) e->engine.clear_display_filter();
 }
+
+// ── ISO-TP ──
+
+int engine_isotp_open(can_engine_t* e, uint32_t tx_id, uint32_t rx_id) {
+    if (!e) return -1;
+    return e->engine.isotp_open(tx_id, rx_id);
+}
+
+void engine_isotp_close(can_engine_t* e) {
+    if (e) e->engine.isotp_close();
+}
+
+int engine_isotp_send(can_engine_t* e, const uint8_t* data, uint32_t len) {
+    if (!e) return -1;
+    return e->engine.isotp_send(data, len);
+}
+
+int engine_isotp_recv(can_engine_t* e, uint8_t* buf, uint32_t buf_len,
+                      int timeout_ms) {
+    if (!e) return -1;
+    return e->engine.isotp_recv(buf, buf_len, timeout_ms);
+}

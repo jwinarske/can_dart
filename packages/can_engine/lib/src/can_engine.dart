@@ -101,6 +101,23 @@ class _EngineBindings {
   late final engineClearDisplayFilter = _lib.lookupFunction<
       Void Function(Pointer<Void>),
       void Function(Pointer<Void>)>('engine_clear_display_filter');
+
+  // ISO-TP
+  late final engineIsotpOpen = _lib.lookupFunction<
+      Int32 Function(Pointer<Void>, Uint32, Uint32),
+      int Function(Pointer<Void>, int, int)>('engine_isotp_open');
+
+  late final engineIsotpClose = _lib.lookupFunction<
+      Void Function(Pointer<Void>),
+      void Function(Pointer<Void>)>('engine_isotp_close');
+
+  late final engineIsotpSend = _lib.lookupFunction<
+      Int32 Function(Pointer<Void>, Pointer<Uint8>, Uint32),
+      int Function(Pointer<Void>, Pointer<Uint8>, int)>('engine_isotp_send');
+
+  late final engineIsotpRecv = _lib.lookupFunction<
+      Int32 Function(Pointer<Void>, Pointer<Uint8>, Uint32, Int32),
+      int Function(Pointer<Void>, Pointer<Uint8>, int, int)>('engine_isotp_recv');
 }
 
 /// Filter types matching C++ FilterType enum.
@@ -126,8 +143,11 @@ class CanEngine {
 
   /// Create a new engine instance.
   ///
-  /// [libraryPath] is the path to the libcan_engine.so shared library.
-  CanEngine({required String libraryPath}) {
+  /// [libraryPath] is the path or filename of the libcan_engine.so shared
+  /// library. Defaults to `'libcan_engine.so'`, which uses the system's
+  /// dynamic linker search order: `LD_LIBRARY_PATH`, `/etc/ld.so.cache`,
+  /// then default library paths.
+  CanEngine({String libraryPath = 'libcan_engine.so'}) {
     final lib = DynamicLibrary.open(libraryPath);
     _bindings = _EngineBindings(lib);
     _handle = _bindings.engineCreate();
@@ -148,19 +168,30 @@ class CanEngine {
   /// Start the engine on the given CAN interface (e.g., "can0", "vcan0").
   ///
   /// Returns 0 on success, negative on error.
+  /// On failure, [lastError] contains the error message from the engine.
   int start(String interfaceName) {
     _checkValid();
     final namePtr = interfaceName.toNativeUtf8();
     try {
       final result = _bindings.engineStart(_handle, namePtr);
-      if (result == 0) {
-        final ptr = _bindings.engineSnapshotPtr(_handle);
-        _snapshotPtr = ptr.cast<DisplaySnapshotNative>();
-      }
+      final ptr = _bindings.engineSnapshotPtr(_handle);
+      _snapshotPtr = ptr.cast<DisplaySnapshotNative>();
       return result;
     } finally {
       calloc.free(namePtr);
     }
+  }
+
+  /// Read the last error message from the engine snapshot.
+  String get lastError {
+    if (_snapshotPtr == null) return 'No snapshot available';
+    final bytes = <int>[];
+    for (var i = 0; i < 128; i++) {
+      final b = _snapshotPtr!.ref.errorMsg[i];
+      if (b == 0) break;
+      bytes.add(b);
+    }
+    return bytes.isEmpty ? 'Unknown error' : String.fromCharCodes(bytes);
   }
 
   /// Stop the engine.
@@ -321,6 +352,62 @@ class CanEngine {
   void clearDisplayFilter() {
     _checkValid();
     _bindings.engineClearDisplayFilter(_handle);
+  }
+
+  // ── ISO-TP (ISO 15765-2) ──
+
+  /// Open an ISO-TP channel with the given TX and RX CAN IDs.
+  ///
+  /// For OBD-II: txId=0x7E0, rxId=0x7E8 (or 0x7DF for broadcast).
+  /// The kernel handles segmentation and reassembly transparently.
+  /// Returns 0 on success, negative on error (check [lastError]).
+  int isotpOpen({required int txId, required int rxId}) {
+    _checkValid();
+    return _bindings.engineIsotpOpen(_handle, txId, rxId);
+  }
+
+  /// Close the ISO-TP channel.
+  void isotpClose() {
+    _checkValid();
+    _bindings.engineIsotpClose(_handle);
+  }
+
+  /// Send an ISO-TP PDU. The kernel handles multi-frame segmentation.
+  ///
+  /// Returns the number of bytes sent, or negative on error.
+  int isotpSend(Uint8List data) {
+    _checkValid();
+    final ptr = calloc<Uint8>(data.length);
+    try {
+      for (var i = 0; i < data.length; i++) {
+        ptr[i] = data[i];
+      }
+      return _bindings.engineIsotpSend(_handle, ptr, data.length);
+    } finally {
+      calloc.free(ptr);
+    }
+  }
+
+  /// Receive a reassembled ISO-TP PDU.
+  ///
+  /// [timeoutMs] sets the timeout in milliseconds (-1 for blocking).
+  /// Returns the received data, or empty on timeout.
+  Uint8List isotpRecv({int timeoutMs = 1000}) {
+    _checkValid();
+    const maxPduSize = 4095; // ISO-TP max
+    final buf = calloc<Uint8>(maxPduSize);
+    try {
+      final nbytes = _bindings.engineIsotpRecv(
+          _handle, buf, maxPduSize, timeoutMs);
+      if (nbytes <= 0) return Uint8List(0);
+      final result = Uint8List(nbytes);
+      for (var i = 0; i < nbytes; i++) {
+        result[i] = buf[i];
+      }
+      return result;
+    } finally {
+      calloc.free(buf);
+    }
   }
 
   /// Destroy the engine and free native resources.
