@@ -1,0 +1,130 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_:
+VAL_TABLE_ SNA_32bit -1 "SNA" ;
+VAL_TABLE_ SNA_6bit 63 "SNA" ;
+VAL_TABLE_ SNA_16bit 65535 "SNA" ;
+VAL_TABLE_ SNA_12bit 4095 "SNA" ;
+VAL_TABLE_ SNA_10bit 1023 "SNA" ;
+VAL_TABLE_ SNA_8bit 255 "SNA" ;
+
+
+BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
+ SG_ Throttle_TEST : 0|16@1- (0.01,0) [-327.68|327.67] "-" Vector__XXX
+
+BO_ 1280 HELM_CMD: 1 Vector__XXX
+ SG_ AUX_Relay_Cmd : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ Boat_Mode : 1|1@1+ (1,0) [0|1] "-" Vector__XXX
+
+BO_ 1281 HELM_01: 4 Vector__XXX
+ SG_ Serial_Number : 16|16@1+ (1,0) [0|65535] "-" Vector__XXX
+ SG_ SW_Minor : 8|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ SW_Major : 0|8@1+ (1,0) [0|255] "-" Vector__XXX
+
+BO_ 336 HELM_00: 6 Vector__XXX
+ SG_ Batt_Status : 20|1@1+ (1,0) [0|0] "flag" Vector__XXX
+ SG_ Reset_Faults : 19|1@1+ (1,0) [0|0] "flag" Vector__XXX
+ SG_ MAIN_Relay_Status : 18|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ Flt_SDcard : 31|1@1+ (1,0) [0|1] "flag" Vector__XXX
+ SG_ Sys_Timer : 32|16@1+ (1,0) [0|0] "counts" Vector__XXX
+ SG_ Key : 7|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ Flt_ThrottleSensor : 29|1@1+ (1,0) [0|1] "flag" Vector__XXX
+ SG_ Flt_InternalComm : 28|1@1+ (1,0) [0|1] "flag" Vector__XXX
+ SG_ Flt_GPS : 27|1@1+ (1,0) [0|1] "flag" Vector__XXX
+ SG_ Flt_DataUpload : 26|1@1+ (1,0) [0|1] "flag" Vector__XXX
+ SG_ Flt_CAN : 25|1@1+ (1,0) [0|1] "flag" Vector__XXX
+ SG_ Flt_ANR : 30|1@1+ (1,0) [0|1] "flag" Vector__XXX
+ SG_ Tilt_Req : 2|3@1+ (1,0) [0|7] "-" Vector__XXX
+ SG_ Throttle : 8|10@1- (0.01,0) [-5.12|5.11] "-" Vector__XXX
+ SG_ StartStop : 24|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ HVIL_Return_Sense : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ HVIL_Relay_Status : 6|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ Estop : 5|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ AUX_Relay_Status : 1|1@1+ (1,0) [0|1] "-" Vector__XXX
+
+BO_ 1283 COG_SOG_RAPID: 6 Vector__XXX
+ SG_ COG_Reference : 8|2@1+ (1,0) [0|3] "-" Vector__XXX
+ SG_ SOG : 32|16@1+ (0.01,0) [0|655.32] "m/s" Vector__XXX
+ SG_ COG : 16|16@1+ (0.0001,0) [0|6.2832] "rad" Vector__XXX
+
+BO_ 1282 POS_RAPID: 8 Vector__XXX
+ SG_ Longitude : 32|32@1- (1E-007,0) [-180|180] "degrees" Vector__XXX
+ SG_ Latitude : 0|32@1- (1E-007,0) [-90|90] "degrees" Vector__XXX
+
+
+
+CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
+CM_ SG_ 336 Batt_Status "Status of hardware signal BATT_LOW, 0=OK, 1=LOW";
+CM_ SG_ 336 Reset_Faults "'Reset_Faults' signal allows the user to press a button requesting fault reset to system controller -- system controller will respond by resetting state machines if faulted";
+CM_ SG_ 336 MAIN_Relay_Status "MAIN relay state commanded by throttle (not based on feedback)";
+CM_ SG_ 336 Flt_SDcard "Generic SD card fault including card not found, card not formatted, loss of comm with SD card
+";
+CM_ SG_ 336 Sys_Timer "Heartbeat of throttle position sensor software code thread";
+CM_ SG_ 336 Flt_ThrottleSensor "Throttle sensor fault";
+CM_ SG_ 336 Flt_InternalComm "Communication fault with an internal component";
+CM_ SG_ 336 Flt_GPS "No GPS signal
+";
+CM_ SG_ 336 Flt_DataUpload "Cloud connection fault (failed to connect to cloud for data upload)";
+CM_ SG_ 336 Flt_CAN "Loss of comm with CAN bus - missing 5 messages in a row
+";
+CM_ SG_ 336 Flt_ANR "Android not responding
+";
+CM_ SG_ 336 Estop "Kill switch / emergency stop button
+";
+CM_ SG_ 336 AUX_Relay_Status "AUX relay state commanded by throttle (not based on feedback)";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "BusType" "CAN";
+VAL_ 3221225472 Throttle_TEST 65535 "SNA" ;
+VAL_ 1280 AUX_Relay_Cmd 1 "ON (closed)" 0 "OFF (open)" ;
+VAL_ 1280 Boat_Mode 1 "DRIVING (HVIL relay activated)" 0 "CHARGING (HVIL relay undriven)" ;
+VAL_ 1281 SW_Minor 255 "SNA" ;
+VAL_ 1281 SW_Major 255 "SNA" ;
+VAL_ 336 Batt_Status 1 "BATT LOW" 0 "BATT OK" ;
+VAL_ 336 MAIN_Relay_Status 1 "CLOSED (MAIN connected to 12V)" 0 "OPEN (No power to MAIN Relay)" ;
+VAL_ 336 Key 1 "PRESENT" 0 "NOT PRESENT" ;
+VAL_ 336 Tilt_Req 7 "SNA" 6 "FAULT (sensor not working)" 5 "<unused>" 4 "<unused>" 3 "<unused>" 2 "TILT UP" 1 "TILT DOWN" 0 "NO REQUEST" ;
+VAL_ 336 Throttle 254 "SENSOR FAULT" 255 "SNA" ;
+VAL_ 336 StartStop 1 "ON" 0 "OFF" ;
+VAL_ 336 HVIL_Return_Sense 1 "Voltage present" 0 "No voltage present" ;
+VAL_ 336 HVIL_Relay_Status 1 "N.O. (Connected to 12V)" 0 "N.C. (Connected to HVIL return)" ;
+VAL_ 336 Estop 1 "ON" 0 "OFF" ;
+VAL_ 336 AUX_Relay_Status 1 "CLOSED (AUX connected to 12V)" 0 "OPEN (No power to AUX)" ;
+VAL_ 1283 COG_Reference 3 "SNA" 2 "ERROR" 1 "MAGNETIC" 0 "TRUE" ;
+VAL_ 1283 SOG 65535 "SNA" ;
+VAL_ 1283 COG 65535 "SNA" ;
+VAL_ 1282 Longitude -1 "SNA" ;
+VAL_ 1282 Latitude -1 "SNA" ;
+

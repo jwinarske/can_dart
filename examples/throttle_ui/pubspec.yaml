@@ -1,0 +1,38 @@
+name: throttle_ui
+description: >-
+  Flutter port of the Throttle helm/dashboard, driven by a DBC file
+  (ThrottleStandardIDs.dbc) rather than a hand-rolled C decoder. The can_dbc
+  parser loads the DBC at startup and every signal is looked up by name, so
+  the DBC file can add/remove/rename signals without breaking the UI code.
+  Frames come off the bus through can_engine's zero-copy snapshot pipeline,
+  the same way charger_ui does it. A matching CLI simulator in bin/
+  (throttle_sim.dart) synthesises HELM_00 / HELM_01 / POS_RAPID /
+  COG_SOG_RAPID traffic onto a vcan interface via can_socket.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  can_dbc:
+    path: ../../packages/can_dbc
+  can_engine:
+    path: ../../packages/can_engine
+  # Used by the bin/throttle_sim.dart CLI simulator (pure Dart, runs via
+  # `dart run`). The Flutter app itself does not touch can_socket directly —
+  # it goes through can_engine.
+  can_socket:
+    path: ../../packages/can_socket
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/dbc/ThrottleStandardIDs.dbc
