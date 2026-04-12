@@ -76,7 +76,10 @@ class CanFrame {
   }
 
   /// Create a CanFrame from a native canfd_frame struct.
-  factory CanFrame.fromFdNative(CanFdFrameNative native, {DateTime? timestamp}) {
+  factory CanFrame.fromFdNative(
+    CanFdFrameNative native, {
+    DateTime? timestamp,
+  }) {
     final rawId = native.canId;
     final len = native.len;
     final data = Uint8List(len);
@@ -135,8 +138,13 @@ class CanFrame {
 
   @override
   String toString() {
-    final hexId = id.toRadixString(16).toUpperCase().padLeft(isExtended ? 8 : 3, '0');
-    final hexData = data.map((b) => b.toRadixString(16).toUpperCase().padLeft(2, '0')).join(' ');
+    final hexId = id
+        .toRadixString(16)
+        .toUpperCase()
+        .padLeft(isExtended ? 8 : 3, '0');
+    final hexData = data
+        .map((b) => b.toRadixString(16).toUpperCase().padLeft(2, '0'))
+        .join(' ');
     final flags = [
       if (isExtended) 'EFF',
       if (isRemote) 'RTR',

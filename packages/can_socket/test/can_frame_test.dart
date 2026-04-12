@@ -37,11 +37,7 @@ void main() {
     });
 
     test('constructs RTR frame', () {
-      final frame = CanFrame(
-        id: 0x100,
-        isRemote: true,
-        data: Uint8List(0),
-      );
+      final frame = CanFrame(id: 0x100, isRemote: true, data: Uint8List(0));
 
       expect(frame.isRemote, true);
       expect(frame.rawId, 0x100 | canRtrFlag);
@@ -65,7 +61,16 @@ void main() {
     test('round-trips through native can_frame', () {
       final original = CanFrame(
         id: 0x7FF,
-        data: Uint8List.fromList([0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE, 0xBA, 0xBE]),
+        data: Uint8List.fromList([
+          0xDE,
+          0xAD,
+          0xBE,
+          0xEF,
+          0xCA,
+          0xFE,
+          0xBA,
+          0xBE,
+        ]),
       );
 
       final ptr = calloc<CanFrameNative>();
@@ -101,12 +106,7 @@ void main() {
         data[i] = i;
       }
 
-      final original = CanFrame(
-        id: 0x456,
-        isFd: true,
-        isBrs: true,
-        data: data,
-      );
+      final original = CanFrame(id: 0x456, isFd: true, isBrs: true, data: data);
 
       final ptr = calloc<CanFdFrameNative>();
       original.toFdNative(ptr);
@@ -118,6 +118,32 @@ void main() {
       expect(restored.isFd, true);
       expect(restored.isBrs, true);
       expect(restored.data, data);
+    });
+
+    test('toFdNative zero-fills trailing bytes of short payloads', () {
+      // Exercises the zero-fill loop at can_frame.dart:132 — previously
+      // uncovered because every canfd roundtrip test used a full 64-byte
+      // payload.
+      final original = CanFrame(
+        id: 0x7EF,
+        isFd: true,
+        data: Uint8List.fromList([0xAA, 0xBB, 0xCC]),
+      );
+
+      final ptr = calloc<CanFdFrameNative>();
+      try {
+        original.toFdNative(ptr);
+        // First three bytes carry the payload.
+        expect(ptr.ref.data[0], 0xAA);
+        expect(ptr.ref.data[1], 0xBB);
+        expect(ptr.ref.data[2], 0xCC);
+        // Remaining bytes up to canfdMaxDlc (64) must be zero.
+        for (var i = 3; i < 64; i++) {
+          expect(ptr.ref.data[i], 0, reason: 'byte $i not zeroed');
+        }
+      } finally {
+        calloc.free(ptr);
+      }
     });
 
     test('toString formats correctly', () {
@@ -167,6 +193,31 @@ void main() {
       expect(ptr.ref.canMask, 0x7F0);
 
       calloc.free(ptr);
+    });
+
+    test('toString formats id + mask as lower-case hex', () {
+      final f = CanFilter(canId: 0x7E0, canMask: 0x7F0);
+      expect(f.toString(), 'CanFilter(id: 0x7e0, mask: 0x7f0)');
+    });
+  });
+
+  group('CanSocketException', () {
+    test('stores message and errno', () {
+      final ex = CanSocketException('bind failed', 19);
+      expect(ex.message, 'bind failed');
+      expect(ex.errno, 19);
+    });
+
+    test('toString includes strerror(errno) from libc', () {
+      // ENODEV = 19; strerror typically yields "No such device".
+      final ex = CanSocketException('bind failed', 19);
+      final s = ex.toString();
+      expect(s, startsWith('CanSocketException: bind failed (errno 19:'));
+      expect(s.toLowerCase(), contains('no such'));
+    });
+
+    test('is an Exception', () {
+      expect(CanSocketException('x', 0), isA<Exception>());
     });
   });
 }

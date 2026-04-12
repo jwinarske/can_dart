@@ -15,8 +15,7 @@ class CanFilter {
   const CanFilter({required this.canId, required this.canMask});
 
   /// Accept only exact CAN ID matches (standard frame).
-  factory CanFilter.exact(int id) =>
-      CanFilter(canId: id, canMask: 0x7FF);
+  factory CanFilter.exact(int id) => CanFilter(canId: id, canMask: 0x7FF);
 
   /// Accept only exact extended CAN ID matches.
   factory CanFilter.exactExtended(int id) =>
