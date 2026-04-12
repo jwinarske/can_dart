@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Native assets build hook for j1939.
 //
 // Drives the project's CMake build to compile libj1939_plugin.so, then

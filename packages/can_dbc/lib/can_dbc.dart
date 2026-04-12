@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 /// Pure Dart DBC file parser and signal compiler for CAN bus databases.
 ///
 /// Parses DBC files into a structured [DbcDatabase] and compiles

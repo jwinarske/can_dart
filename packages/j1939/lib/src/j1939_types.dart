@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // j1939_types.dart — Value types and sealed event hierarchy for the J1939 API.
 // No FFI imports; safe to use from any isolate.
 

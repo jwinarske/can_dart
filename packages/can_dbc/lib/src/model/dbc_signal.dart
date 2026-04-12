@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 /// Byte order of a CAN signal.
 enum ByteOrder {
   /// Intel byte order (little-endian).

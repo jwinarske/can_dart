@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 import 'dart:ffi';
 
 /// Max lengths matching can_engine C++ definitions.

@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 /// Token types for DBC file parsing.
 enum TokenType {
   keyword, // VERSION, NS_, BS_, BU_, BO_, SG_, CM_, BA_DEF_, BA_, VAL_, etc.

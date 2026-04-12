@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Unit tests for j1939::Id, j1939::Name, and j1939::Dm1Fault.
 //
 // These are pure value types with encode/decode bit-field codecs — no Asio,

@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Unit tests for can_engine bit extraction, signal normalization, and filter
 // state machines.
 //

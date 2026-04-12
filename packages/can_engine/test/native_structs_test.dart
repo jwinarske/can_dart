@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Pure-Dart tests for native_structs.dart and the FilterType enum.
 //
 // These tests exercise the FFI struct layout (via calloc + field roundtrip)

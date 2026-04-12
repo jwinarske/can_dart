@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 import 'dart:io';
 
 import 'package:can_dbc/can_dbc.dart';

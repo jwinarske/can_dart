@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Integration test: exercises the full CanEngine lifecycle against vcan0.
 //
 // Skipped when vcan0 is not up. In CI, the workflow brings up vcan0 first.

@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 import 'dbc_signal.dart';
 
 /// A message definition from a DBC file.

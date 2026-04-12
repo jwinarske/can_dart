@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 /// Native struct definitions matching the C++ DisplaySnapshot layout.
 ///
 /// These structs are used with Pointer.ref for zero-copy reads.

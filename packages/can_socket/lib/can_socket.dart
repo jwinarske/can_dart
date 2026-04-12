@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 /// Pure Dart FFI bindings for Linux SocketCAN.
 ///
 /// Provides raw CAN, CAN FD, BCM, ISO-TP, and J1939 socket access

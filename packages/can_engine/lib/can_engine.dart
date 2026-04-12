@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 /// Zero-copy CAN engine with C++ Asio event loop.
 ///
 /// Dart reads the DisplaySnapshot via Pointer.ref — no copies, no GC.

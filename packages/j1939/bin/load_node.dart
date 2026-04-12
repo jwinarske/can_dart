@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // bin/load_node.dart — J1939 stack load-testing node.
 //
 // A single long-running instance that claims an address on a SocketCAN

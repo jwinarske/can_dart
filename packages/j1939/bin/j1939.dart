@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // bin/j1939.dart — J1939 two-ECU demo on vcan0.
 //
 // Setup:

@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 /*
  * j1939_linux — Pure C++23 J1939 stack on SocketCAN
  *

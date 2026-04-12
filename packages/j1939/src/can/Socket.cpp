@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Linux CAN headers confined to this translation unit.
 #include <cerrno>
 #include <system_error>

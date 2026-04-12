@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Pure-Dart tests for lib/src/j1939_types.dart.
 //
 // Intentionally does NOT import package:j1939/j1939.dart — that barrel pulls

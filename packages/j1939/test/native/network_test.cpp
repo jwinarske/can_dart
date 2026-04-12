@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Unit tests for j1939::network::AddressClaimer.
 //
 // Tests the J1939/81 address-claim state machine by driving it with

@@ -1,4 +1,4 @@
-// Copyright 2024 can_dart Contributors
+// Copyright 2026 Joel Winarske
 // SPDX-License-Identifier: Apache-2.0
 
 // j1939_ffi.cpp — Dart FFI implementation layer

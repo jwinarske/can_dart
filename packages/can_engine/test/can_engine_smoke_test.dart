@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Smoke test for the CanEngine lifecycle against the real libcan_engine.so.
 //
 // Locates the .so under .dart_tool/hooks_runner/shared/can_engine/build/**

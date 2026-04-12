@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Integration test: exercises the full J1939Ecu lifecycle against vcan0.
 //
 // Skipped automatically when vcan0 is not up. In CI, `.github/workflows/ci.yml`

@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Unit tests for j1939::transport::Receiver (BAM reassembly).
 //
 // Feeds synthetic TP.CM (BAM announcement) and TP.DT (data transfer)

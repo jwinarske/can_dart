@@ -1,4 +1,4 @@
-// Copyright 2024 can_dart Contributors
+// Copyright 2026 Joel Winarske
 // SPDX-License-Identifier: Apache-2.0
 
 // nmea2000.dart — NMEA 2000 protocol layer on top of package:j1939.

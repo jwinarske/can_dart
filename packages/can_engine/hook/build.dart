@@ -1,4 +1,4 @@
-// hook/build.dart
+// Copyright 2026 Joel Winarske
 // SPDX-License-Identifier: Apache-2.0
 //
 // Compiles libcan_engine.so via CMake (Asio + Glaze) and registers it as a

@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 /// SocketCAN constants matching linux/can.h, linux/can/raw.h,
 /// linux/can/bcm.h, linux/can/isotp.h, linux/can/j1939.h.
 library;

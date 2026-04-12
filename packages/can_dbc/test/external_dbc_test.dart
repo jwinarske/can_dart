@@ -1,3 +1,6 @@
+// Copyright 2026 Joel Winarske
+// SPDX-License-Identifier: Apache-2.0
+
 // Optional test: validates DbcParser against two public DBC corpora.
 //
 // Skipped by default. Opt in with an environment variable:
