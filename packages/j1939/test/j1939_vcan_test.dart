@@ -164,9 +164,8 @@ void main() {
           .timeout(const Duration(seconds: 2));
 
       a.addDm1Fault(spn: 100, fmi: 1, occurrence: 1);
-      // The fault is registered synchronously in the C++ vector, but allow
-      // the RX threads time to settle on slow CI runners before requesting.
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      // Give the fault time to be registered before requesting.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       b.sendRequest(0xD0, Pgn.dm1);
 
       final dm1 = await dm1Future;

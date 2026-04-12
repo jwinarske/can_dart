@@ -291,7 +291,8 @@ J1939Handle* j1939_create(const char* ifname, uint8_t preferred_address,
                 const uint32_t spn =
                     static_cast<uint32_t>(f.data[base]) |
                     (static_cast<uint32_t>(f.data[base + 1U]) << 8U) |
-                    (static_cast<uint32_t>(f.data[base + 2U] & 0x07U) << 16U);
+                    (static_cast<uint32_t>((f.data[base + 2U] >> 5U) & 0x07U)
+                     << 16U);
                 const uint8_t fmi = f.data[base + 2U] & 0x1FU;
                 const uint8_t occurrence = f.data[base + 3U] & 0x7FU;
                 post_dm1(port, f.source, spn, fmi, occurrence);
@@ -414,7 +415,8 @@ J1939Handle* j1939_create_full(const char* ifname, uint8_t preferred_address,
                 const uint32_t spn =
                     static_cast<uint32_t>(f.data[base]) |
                     (static_cast<uint32_t>(f.data[base + 1U]) << 8U) |
-                    (static_cast<uint32_t>(f.data[base + 2U] & 0x07U) << 16U);
+                    (static_cast<uint32_t>((f.data[base + 2U] >> 5U) & 0x07U)
+                     << 16U);
                 const uint8_t fmi = f.data[base + 2U] & 0x1FU;
                 const uint8_t occurrence = f.data[base + 3U] & 0x7FU;
                 post_dm1(port, f.source, spn, fmi, occurrence);
