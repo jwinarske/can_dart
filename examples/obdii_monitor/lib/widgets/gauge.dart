@@ -99,7 +99,7 @@ class _GaugePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 2 - 8;
     const startAngle = 0.75 * pi; // 135 degrees
-    const sweepAngle = 1.5 * pi;  // 270 degrees
+    const sweepAngle = 1.5 * pi; // 270 degrees
 
     // Background arc
     final bgPaint = Paint()
@@ -134,6 +134,5 @@ class _GaugePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_GaugePainter oldDelegate) =>
-      fraction != oldDelegate.fraction ||
-      color != oldDelegate.color;
+      fraction != oldDelegate.fraction || color != oldDelegate.color;
 }

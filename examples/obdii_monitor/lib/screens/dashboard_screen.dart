@@ -126,15 +126,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             dense: true,
                             title: Text(pid.name),
                             subtitle: Text(
-                                'PID 0x${pid.pid.toRadixString(16).toUpperCase().padLeft(2, '0')}'),
+                              'PID 0x${pid.pid.toRadixString(16).toUpperCase().padLeft(2, '0')}',
+                            ),
                             trailing: Text(
                               '${e.value.value.toStringAsFixed(1)} ${pid.unit}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
+                              style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(
                                     fontFeatures: const [
-                                      FontFeature.tabularFigures()
+                                      FontFeature.tabularFigures(),
                                     ],
                                   ),
                             ),

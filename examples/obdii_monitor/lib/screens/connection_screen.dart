@@ -91,7 +91,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                 const SizedBox(height: 32),
                 if (hasInterfaces) ...[
                   DropdownButtonFormField<String>(
-                    value: _selectedInterface,
+                    initialValue: _selectedInterface,
                     decoration: const InputDecoration(
                       labelText: 'CAN Interface',
                       prefixIcon: Icon(Icons.settings_ethernet),
@@ -133,9 +133,9 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -149,13 +149,11 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
                           child: Text(
                             'No CAN interfaces detected.\n'
                             'Use Demo Mode to explore the app.',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                           ),
                         ),

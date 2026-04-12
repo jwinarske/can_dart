@@ -90,18 +90,9 @@ class _AppShellState extends State<AppShell> {
           setState(() => _selectedIndex = index);
         },
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.speed),
-            label: 'Dashboard',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.warning_amber),
-            label: 'DTCs',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.list_alt),
-            label: 'PIDs',
-          ),
+          NavigationDestination(icon: Icon(Icons.speed), label: 'Dashboard'),
+          NavigationDestination(icon: Icon(Icons.warning_amber), label: 'DTCs'),
+          NavigationDestination(icon: Icon(Icons.list_alt), label: 'PIDs'),
         ],
       ),
     );

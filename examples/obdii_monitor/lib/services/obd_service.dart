@@ -26,12 +26,7 @@ class PidValue {
 }
 
 /// Connection state.
-enum ConnectionState {
-  disconnected,
-  connecting,
-  connected,
-  error,
-}
+enum ConnectionState { disconnected, connecting, connected, error }
 
 /// OBD-II service layer.
 ///
@@ -188,7 +183,9 @@ class ObdService {
     if (_engine == null) return [];
 
     // ISO-TP request: Mode 03 (show stored DTCs)
-    final result = _engine!.isotpSend(Uint8List.fromList([ObdMode.showStoredDtc]));
+    final result = _engine!.isotpSend(
+      Uint8List.fromList([ObdMode.showStoredDtc]),
+    );
     if (result < 0) return [];
 
     // Receive reassembled response
@@ -234,7 +231,8 @@ class ObdService {
     if (_engine == null) return '';
 
     final result = _engine!.isotpSend(
-        Uint8List.fromList([ObdMode.vehicleInfo, 0x02]));
+      Uint8List.fromList([ObdMode.vehicleInfo, 0x02]),
+    );
     if (result < 0) return '';
 
     final response = _engine!.isotpRecv(timeoutMs: 2000);
@@ -294,16 +292,18 @@ class ObdService {
         }
       case _DrivingPhase.cruising:
         if (_simPhaseTime > 10 + _rng.nextDouble() * 10) {
-          _transitionTo(_rng.nextBool()
-              ? _DrivingPhase.decelerating
-              : _DrivingPhase.accelerating);
+          _transitionTo(
+            _rng.nextBool()
+                ? _DrivingPhase.decelerating
+                : _DrivingPhase.accelerating,
+          );
         }
       case _DrivingPhase.decelerating:
         if (_simSpeed < 5) _transitionTo(_DrivingPhase.idle);
     }
 
     // Update values based on phase
-    final noise = () => (_rng.nextDouble() - 0.5) * 2;
+    double noise() => (_rng.nextDouble() - 0.5) * 2;
 
     switch (_simPhase) {
       case _DrivingPhase.warmup:
@@ -319,7 +319,11 @@ class ObdService {
         _simLoad = _lerp(_simLoad, 15 + noise() * 2, 0.1);
       case _DrivingPhase.accelerating:
         _simThrottle = _lerp(_simThrottle, 45 + noise() * 20, 0.08);
-        _simRpm = _lerp(_simRpm, 2500 + _simThrottle * 40 + noise() * 100, 0.06);
+        _simRpm = _lerp(
+          _simRpm,
+          2500 + _simThrottle * 40 + noise() * 100,
+          0.06,
+        );
         _simSpeed = _lerp(_simSpeed, _simSpeed + 0.8 + noise() * 0.1, 0.1);
         _simLoad = _lerp(_simLoad, 40 + _simThrottle * 0.8 + noise() * 5, 0.08);
       case _DrivingPhase.cruising:
@@ -336,10 +340,18 @@ class ObdService {
     }
 
     // Derived values
-    _simCoolant = _lerp(_simCoolant, 88 + _simLoad * 0.15 + noise() * 0.5, 0.005);
+    _simCoolant = _lerp(
+      _simCoolant,
+      88 + _simLoad * 0.15 + noise() * 0.5,
+      0.005,
+    );
     _simMaf = _lerp(_simMaf, _simRpm * _simLoad / 8000 + noise() * 0.3, 0.1);
     _simTimingAdv = _lerp(_simTimingAdv, 10 + _simRpm / 500 + noise(), 0.05);
-    _simIntakeTemp = _lerp(_simIntakeTemp, 30 + _simLoad * 0.1 + noise() * 0.5, 0.01);
+    _simIntakeTemp = _lerp(
+      _simIntakeTemp,
+      30 + _simLoad * 0.1 + noise() * 0.5,
+      0.01,
+    );
     _simOilTemp = _lerp(_simOilTemp, _simCoolant - 5 + noise() * 0.5, 0.003);
     _simBarometric = 101 + noise() * 0.2;
     _simFuel = (_simFuel - 0.0001 * _simLoad * dt).clamp(0.0, 100.0);
@@ -415,10 +427,4 @@ class ObdService {
   }
 }
 
-enum _DrivingPhase {
-  warmup,
-  idle,
-  accelerating,
-  cruising,
-  decelerating,
-}
+enum _DrivingPhase { warmup, idle, accelerating, cruising, decelerating }
