@@ -1,0 +1,42 @@
+name: j1939
+description: >
+  Dart FFI bindings for the j1939 Linux SocketCAN stack.
+  Provides async J1939 frame TX/RX, address claiming, DM1 diagnostics,
+  and zero-copy frame delivery via Dart_PostCObject_DL.
+version: 0.1.0
+repository: https://github.com/your-org/j1939
+
+# Dart 3.0 required for:
+#   • Sealed classes (j1939_types.dart)
+#   • Record destructuring: (claimA, claimB) = await (...).wait
+#   • (Future<A>, Future<B>).wait extension
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+# `dart run j1939`            invokes bin/j1939.dart     — 2-ECU demo.
+# `dart run j1939:load_node`  invokes bin/load_node.dart — stack load-test node.
+executables:
+  j1939:
+  load_node:
+
+dependencies:
+  # Provides: Pointer<Utf8>, malloc, Arena, using(), Utf8.toNativeUtf8()
+  # Used in: j1939_native.dart, j1939.dart
+  ffi: ^2.1.0
+
+  # Native assets build hook — drives CMake from hook/build.dart so that
+  # `dart pub get` compiles libj1939_plugin.so automatically.
+  hooks: ^1.0.0
+  code_assets: ^1.0.0
+
+dev_dependencies:
+  # Static analysis
+  lints: ^6.1.0
+
+  # Unit tests (pure-Dart surfaces: types, event hierarchy, bindings).
+  test: ^1.25.0
+
+# The shared library is built by hook/build.dart and declared as a CodeAsset
+# under the asset id `package:j1939/src/j1939_native.dart`. At runtime
+# lib/src/j1939_native.dart resolves the .so via a multi-stage search
+# (dlopen → .dart_tool/hooks_runner → bundle-relative → LD_LIBRARY_PATH).
