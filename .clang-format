@@ -1,0 +1,9 @@
+# Style for the can_dart monorepo.
+# Pin BasedOnStyle so local and CI clang-format versions agree.
+BasedOnStyle: LLVM
+ColumnLimit: 80
+IndentWidth: 4
+UseTab: Never
+PointerAlignment: Left
+ReferenceAlignment: Left
+SpaceBeforeCpp11BracedList: true

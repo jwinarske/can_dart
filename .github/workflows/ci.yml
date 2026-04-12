@@ -177,11 +177,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang-format
       - name: Check C++ formatting
-        run: |
-          find packages/can_engine/src packages/j1939/src packages/j1939/ffi \
-            -type f \( -name '*.cpp' -o -name '*.cc' -o -name '*.hpp' -o -name '*.h' \) \
-            -not -name 'dart_api_dl*' \
-            -print0 | xargs -0 --no-run-if-empty clang-format --dry-run --Werror
+        run: ./scripts/clang-format-check.sh
 
   clang-tidy:
     runs-on: ubuntu-latest

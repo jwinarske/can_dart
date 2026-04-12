@@ -14,7 +14,8 @@
 
 namespace j1939::network {
 
-// ── AddressClaimer ────────────────────────────────────────────────────────────
+// ── AddressClaimer
+// ────────────────────────────────────────────────────────────
 //
 // Implements the J1939/81 address claiming state machine.
 //
@@ -29,19 +30,20 @@ namespace j1939::network {
 // Conflict handling
 // ─────────────────
 //   If a competing claim arrives with a lower NAME value, we either:
-//     a) pick a different preferred address and re-claim (arbitrary_address=true), or
-//     b) send "Cannot Claim Address" (SA=0xFE) and call on_cannot_claim.
+//     a) pick a different preferred address and re-claim
+//     (arbitrary_address=true), or b) send "Cannot Claim Address" (SA=0xFE) and
+//     call on_cannot_claim.
 //
 //   In this implementation, if no alternative address is found in one scan
 //   of the 0–253 space, we give up and report the error.
 
 class AddressClaimer {
-public:
-    AddressClaimer(can::Socket& socket,
-                   Address preferred_address,
+  public:
+    AddressClaimer(can::Socket& socket, Address preferred_address,
                    Name own_name);
 
-    // Begin the claim process.  Broadcasts Address Claimed with SA = preferred_.
+    // Begin the claim process.  Broadcasts Address Claimed with SA =
+    // preferred_.
     void claim();
 
     // Call from the RX thread whenever an Address Claimed frame is received.
@@ -60,26 +62,26 @@ public:
     void request_all_addresses();
 
     [[nodiscard]] Address current_address() const noexcept { return current_; }
-    [[nodiscard]] bool    is_claimed()      const noexcept { return claimed_; }
+    [[nodiscard]] bool is_claimed() const noexcept { return claimed_; }
 
-private:
+  private:
     void send_address_claimed(Address sa);
     void send_cannot_claim();
     Address find_free_address() const;
 
     can::Socket& socket_;
-    Name         own_name_;
-    Address      preferred_;
-    Address      current_;
-    bool         claimed_       = false;
-    bool         conflict_seen_ = false;
+    Name own_name_;
+    Address preferred_;
+    Address current_;
+    bool claimed_ = false;
+    bool conflict_seen_ = false;
 
     // addresses known to be in use by peers: index = address, value = name
     // (stored as encoded uint64 for compact storage)
-    std::array<std::optional<uint64_t>, 254> peer_names_{};
+    std::array<std::optional<uint64_t>, 254> peer_names_ {};
 
-    std::chrono::milliseconds elapsed_{0};
-    static constexpr auto kClaimWindow = std::chrono::milliseconds{250};
+    std::chrono::milliseconds elapsed_ {0};
+    static constexpr auto kClaimWindow = std::chrono::milliseconds {250};
 };
 
 } // namespace j1939::network

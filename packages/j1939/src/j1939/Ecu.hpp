@@ -16,20 +16,23 @@
 
 namespace j1939 {
 
-// ── Ecu ───────────────────────────────────────────────────────────────────────
+// ── Ecu
+// ───────────────────────────────────────────────────────────────────────
 //
 // One logical J1939 ECU on a SocketCAN interface.  Owns:
 //   • A SocketCAN RAII socket
 //   • A transport-layer receiver (BAM + RTS/CTS reassembly)
 //   • An address claimer (J1939/81 state machine)
-//   • An RX jthread  — polls the socket, drives address claiming, dispatches frames
-//   • An ASIO io_context + thread — runs BAM send coroutines without blocking
-//   • A BAM strand — serialises concurrent send_async() calls (J1939/21 §5.10.2.1)
+//   • An RX jthread  — polls the socket, drives address claiming, dispatches
+//   frames • An ASIO io_context + thread — runs BAM send coroutines without
+//   blocking • A BAM strand — serialises concurrent send_async() calls
+//   (J1939/21 §5.10.2.1)
 //
 // Thread safety
 // ─────────────
 //   • send() and all mutating public methods acquire the internal mutex.
-//   • send_async() captures own_address under the mutex, then releases it before
+//   • send_async() captures own_address under the mutex, then releases it
+//   before
 //     co-spawning the BAM coroutine.  The coroutine runs on the ASIO thread.
 //   • on_message callback fires on the RX thread with the mutex released.
 //   • The destructor stops both threads and is safe to call from any thread.
@@ -46,11 +49,11 @@ namespace j1939 {
 //   socket destroyed last
 
 class Ecu {
-public:
-    Ecu(const Ecu&)            = delete;
+  public:
+    Ecu(const Ecu&) = delete;
     Ecu& operator=(const Ecu&) = delete;
-    Ecu(Ecu&&)                 = delete;
-    Ecu& operator=(Ecu&&)      = delete;
+    Ecu(Ecu&&) = delete;
+    Ecu& operator=(Ecu&&) = delete;
 
     ~Ecu();
 
@@ -58,9 +61,7 @@ public:
 
     [[nodiscard]]
     static std::expected<std::unique_ptr<Ecu>, std::error_code>
-    create(std::string_view ifname,
-           Address          preferred_address,
-           Name             name);
+    create(std::string_view ifname, Address preferred_address, Name name);
 
     // ── Transmit ──────────────────────────────────────────────────────────
 
@@ -69,9 +70,9 @@ public:
     // For RTS/CTS (unicast, len > 8) it sends RTS and returns — DT packets
     // are driven by CTS responses on the RX thread (see RtsCtsSession note).
     [[nodiscard]]
-    std::expected<void, std::string_view>
-    send(Pgn pgn, Priority priority, Address dest,
-         std::span<const uint8_t> data);
+    std::expected<void, std::string_view> send(Pgn pgn, Priority priority,
+                                               Address dest,
+                                               std::span<const uint8_t> data);
 
     // Asynchronous.  Returns immediately; on_complete fires on the ASIO thread
     // when the full transmission is done (or on error/cancellation).
@@ -87,8 +88,8 @@ public:
 
     // Convenience: send a request for any PGN (3-byte payload, PGN 0xEA00).
     [[nodiscard]]
-    std::expected<void, std::string_view>
-    send_request(Address dest, Pgn requested_pgn);
+    std::expected<void, std::string_view> send_request(Address dest,
+                                                       Pgn requested_pgn);
 
     // ── Receive ───────────────────────────────────────────────────────────
 
@@ -109,10 +110,10 @@ public:
 
     // ── Identity ──────────────────────────────────────────────────────────
 
-    [[nodiscard]] Address address()        const noexcept;
-    [[nodiscard]] bool    address_claimed() const noexcept;
+    [[nodiscard]] Address address() const noexcept;
+    [[nodiscard]] bool address_claimed() const noexcept;
 
-private:
+  private:
     Ecu() = default;
 
     struct Impl;
