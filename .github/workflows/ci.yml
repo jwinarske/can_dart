@@ -33,7 +33,7 @@ jobs:
           set -e
           for pkg in packages/can_socket packages/can_dbc packages/can_engine packages/j1939; do
             echo "::group::dart format $pkg"
-            (cd "$pkg" && dart pub get --offline 2>/dev/null || (cd "$pkg" && dart pub get))
+            (cd "$pkg" && dart pub get --offline 2>/dev/null || dart pub get)
             (cd "$pkg" && dart format --output=none --set-exit-if-changed .)
             echo "::endgroup::"
           done
@@ -83,7 +83,10 @@ jobs:
       - name: Bring up vcan0
         # Required by can_socket/can_socket_vcan_test.dart and by any
         # j1939 / can_engine integration test that binds to a CAN iface.
+        # The vcan module may be missing on some kernel builds (e.g. Azure);
+        # install linux-modules-extra to pull it in.
         run: |
+          sudo apt-get install -y linux-modules-extra-$(uname -r) || true
           sudo modprobe vcan
           sudo ip link add dev vcan0 type vcan || true
           sudo ip link set up vcan0

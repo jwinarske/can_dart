@@ -55,9 +55,9 @@
 // so every symbol Dart looks up via DynamicLibrary.lookupFunction must be
 // explicitly tagged with default visibility. extern "C" alone is not enough.
 #if defined(_WIN32) || defined(__CYGWIN__)
-#  define J1939_FFI_EXPORT __declspec(dllexport)
+#define J1939_FFI_EXPORT __declspec(dllexport)
 #else
-#  define J1939_FFI_EXPORT __attribute__((visibility("default")))
+#define J1939_FFI_EXPORT __attribute__((visibility("default")))
 #endif
 
 #ifdef __cplusplus
@@ -66,71 +66,61 @@ extern "C" {
 
 typedef struct J1939Handle_ J1939Handle;
 
-// ── Initialization ────────────────────────────────────────────────────────────
+// ── Initialization
+// ────────────────────────────────────────────────────────────
 
 // Store NativeApi.postCObject so the RX / ASIO threads can post CObjects.
 // Call once from Dart before j1939_create().  Thread-safe by convention
 // (call before any ECU is created).
-J1939_FFI_EXPORT void j1939_set_post_cobject(void* fn);
+J1939_FFI_EXPORT void j1939_set_post_cobject(void *fn);
 
-// ── Lifecycle ─────────────────────────────────────────────────────────────────
+// ── Lifecycle
+// ─────────────────────────────────────────────────────────────────
 
 // Create an ECU.  Starts address claiming immediately.
 // event_port_id: RawReceivePort.sendPort.nativePort on the Dart side.
 // Returns null on failure; j1939_last_error() gives the OS errno.
-J1939_FFI_EXPORT J1939Handle* j1939_create(
-    const char* ifname,
-    uint8_t     preferred_address,
-    uint32_t    identity_number,
-    uint16_t    manufacturer_code,
-    uint8_t     industry_group,
-    int64_t     event_port_id
-);
+J1939_FFI_EXPORT J1939Handle *
+j1939_create(const char *ifname, uint8_t preferred_address,
+             uint32_t identity_number, uint16_t manufacturer_code,
+             uint8_t industry_group, int64_t event_port_id);
 
 // Stop the RX thread and close the socket.  Safe from any thread.
-J1939_FFI_EXPORT void j1939_destroy(J1939Handle* handle);
+J1939_FFI_EXPORT void j1939_destroy(J1939Handle *handle);
 
 // errno value set by the most recent failed call on this thread.
 J1939_FFI_EXPORT int32_t j1939_last_error(void);
 
-// ── Transmit ──────────────────────────────────────────────────────────────────
+// ── Transmit
+// ──────────────────────────────────────────────────────────────────
 
 // Copy data and transmit.  Automatically selects:
 //   len ≤ 8             → single CAN frame
 //   len > 8, broadcast  → BAM  (blocks ~200–400 ms, call from worker isolate)
 //   len > 8, unicast    → RTS/CTS
 // Returns 0 on success, -errno on failure.
-J1939_FFI_EXPORT int32_t j1939_send(
-    J1939Handle*   handle,
-    uint32_t       pgn,
-    uint8_t        priority,
-    uint8_t        dest,
-    const uint8_t* data,
-    uint16_t       len
-);
+J1939_FFI_EXPORT int32_t j1939_send(J1939Handle *handle, uint32_t pgn,
+                                    uint8_t priority, uint8_t dest,
+                                    const uint8_t *data, uint16_t len);
 
-// ── Diagnostics ───────────────────────────────────────────────────────────────
+// ── Diagnostics
+// ───────────────────────────────────────────────────────────────
 
-J1939_FFI_EXPORT void j1939_add_dm1_fault(
-    J1939Handle* handle,
-    uint32_t     spn,
-    uint8_t      fmi,
-    uint8_t      occurrence
-);
+J1939_FFI_EXPORT void j1939_add_dm1_fault(J1939Handle *handle, uint32_t spn,
+                                          uint8_t fmi, uint8_t occurrence);
 
-J1939_FFI_EXPORT void j1939_clear_dm1_faults(J1939Handle* handle);
+J1939_FFI_EXPORT void j1939_clear_dm1_faults(J1939Handle *handle);
 
-// ── Convenience transmit ──────────────────────────────────────────────────────
+// ── Convenience transmit
+// ──────────────────────────────────────────────────────
 
 // Send a PGN request (3-byte payload, PGN 0xEA00).
 // Returns 0 on success, -errno on failure.
-J1939_FFI_EXPORT int32_t j1939_send_request(
-    J1939Handle* handle,
-    uint8_t      dest,
-    uint32_t     requested_pgn
-);
+J1939_FFI_EXPORT int32_t j1939_send_request(J1939Handle *handle, uint8_t dest,
+                                            uint32_t requested_pgn);
 
-// ── Async transmit ────────────────────────────────────────────────────────────
+// ── Async transmit
+// ────────────────────────────────────────────────────────────
 //
 // Returns immediately.  When the full transmission completes (or fails),
 // a type-5 message is posted to the ECU's event port:
@@ -142,44 +132,35 @@ J1939_FFI_EXPORT int32_t j1939_send_request(
 // isolate or Pointer.fromAddress hack required.
 // For unicast payloads > 8 bytes (RTS/CTS): calls on_complete with ENOTSUP
 // immediately (full async RTS/CTS is not yet implemented).
-J1939_FFI_EXPORT void j1939_send_async(
-    J1939Handle*   handle,
-    int32_t        send_id,
-    uint32_t       pgn,
-    uint8_t        priority,
-    uint8_t        dest,
-    const uint8_t* data,
-    uint16_t       len
-);
+J1939_FFI_EXPORT void j1939_send_async(J1939Handle *handle, int32_t send_id,
+                                       uint32_t pgn, uint8_t priority,
+                                       uint8_t dest, const uint8_t *data,
+                                       uint16_t len);
 
-// ── State ─────────────────────────────────────────────────────────────────────
+// ── State
+// ─────────────────────────────────────────────────────────────────────
 
-J1939_FFI_EXPORT uint8_t j1939_address(J1939Handle* handle);
-J1939_FFI_EXPORT bool    j1939_address_claimed(J1939Handle* handle);
+J1939_FFI_EXPORT uint8_t j1939_address(J1939Handle *handle);
+J1939_FFI_EXPORT bool j1939_address_claimed(J1939Handle *handle);
 
 // ── Extended lifecycle (NMEA 2000) ───────────────────────────────────────────
 
 // Create an ECU with full NAME field control.
 // Same as j1939_create but accepts all J1939 NAME fields needed for NMEA 2000.
-J1939_FFI_EXPORT J1939Handle* j1939_create_full(
-    const char* ifname,
-    uint8_t     preferred_address,
-    uint32_t    identity_number,
-    uint16_t    manufacturer_code,
-    uint8_t     industry_group,
-    uint8_t     device_function,
-    uint8_t     device_class,
-    uint8_t     function_instance,
-    uint8_t     ecu_instance,
-    int64_t     event_port_id
-);
+J1939_FFI_EXPORT J1939Handle *
+j1939_create_full(const char *ifname, uint8_t preferred_address,
+                  uint32_t identity_number, uint16_t manufacturer_code,
+                  uint8_t industry_group, uint8_t device_function,
+                  uint8_t device_class, uint8_t function_instance,
+                  uint8_t ecu_instance, int64_t event_port_id);
 
 // ── NMEA 2000 Fast Packet ────────────────────────────────────────────────────
 
 // Register a PGN transport type at runtime.
 // transport: 0 = single, 1 = fast_packet, 2 = iso_tp.
 // Takes effect immediately for all ECU instances.
-J1939_FFI_EXPORT void nmea2000_set_pgn_transport(uint32_t pgn, uint8_t transport);
+J1939_FFI_EXPORT void nmea2000_set_pgn_transport(uint32_t pgn,
+                                                 uint8_t transport);
 
 #ifdef __cplusplus
 }
