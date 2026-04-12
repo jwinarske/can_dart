@@ -46,11 +46,7 @@ class BcmRxConfig {
   /// Throttle interval in microseconds (0 = no throttle).
   final int ival2Us;
 
-  const BcmRxConfig({
-    required this.canId,
-    this.ival1Us = 0,
-    this.ival2Us = 0,
-  });
+  const BcmRxConfig({required this.canId, this.ival1Us = 0, this.ival2Us = 0});
 }
 
 /// A CAN Broadcast Manager (BCM) socket.
@@ -154,8 +150,7 @@ class CanBcmSocket {
       final frames = <CanFrame>[];
 
       if (nbytes > sizeOf<BcmMsgHead>() && head.nframes > 0) {
-        final framePtr =
-            (buf + sizeOf<BcmMsgHead>()).cast<CanFrameNative>();
+        final framePtr = (buf + sizeOf<BcmMsgHead>()).cast<CanFrameNative>();
         frames.add(CanFrame.fromNative(framePtr.ref));
       }
 

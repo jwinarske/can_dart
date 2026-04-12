@@ -37,11 +37,7 @@ class CanJ1939Socket {
   }
 
   /// Send J1939 data to a destination.
-  void send(
-    Uint8List data, {
-    required int destAddr,
-    required int destPgn,
-  }) {
+  void send(Uint8List data, {required int destAddr, required int destPgn}) {
     _checkOpen();
 
     final addr = calloc<SockaddrCan>();
@@ -135,7 +131,12 @@ class CanJ1939Socket {
     try {
       ptr.value = enable ? 1 : 0;
       final ret = Libc.setsockopt(
-          _fd, solCanJ1939, soJ1939Promisc, ptr.cast(), sizeOf<Int32>());
+        _fd,
+        solCanJ1939,
+        soJ1939Promisc,
+        ptr.cast(),
+        sizeOf<Int32>(),
+      );
       if (ret < 0) _throwErrno('setsockopt(J1939_PROMISC)');
     } finally {
       calloc.free(ptr);
@@ -143,7 +144,12 @@ class CanJ1939Socket {
   }
 
   /// Set J1939 address filters.
-  void setFilters(List<({int name, int nameMask, int addr, int addrMask, int pgn, int pgnMask})> filters) {
+  void setFilters(
+    List<
+      ({int name, int nameMask, int addr, int addrMask, int pgn, int pgnMask})
+    >
+    filters,
+  ) {
     _checkOpen();
 
     final ptr = calloc<J1939Filter>(filters.length);

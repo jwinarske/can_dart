@@ -20,39 +20,35 @@ void main(List<String> args) async {
     final cmakeArch = switch (arch) {
       Architecture.x64 => 'x86_64',
       Architecture.arm64 => 'aarch64',
-      _ => throw UnsupportedError(
-          'can_engine does not support architecture: $arch'),
+      _ =>
+        throw UnsupportedError(
+          'can_engine does not support architecture: $arch',
+        ),
     };
 
     final srcDir = input.packageRoot;
     final buildDir = Directory.fromUri(
-        input.outputDirectory.resolve('can_engine_build_$cmakeArch/'));
+      input.outputDirectory.resolve('can_engine_build_$cmakeArch/'),
+    );
     await buildDir.create(recursive: true);
 
     // Configure
-    final configure = await Process.run(
-        'cmake',
-        [
-          srcDir.toFilePath(),
-          '-GNinja',
-          '-DCMAKE_BUILD_TYPE=Release',
-        ],
-        workingDirectory: buildDir.path);
+    final configure = await Process.run('cmake', [
+      srcDir.toFilePath(),
+      '-GNinja',
+      '-DCMAKE_BUILD_TYPE=Release',
+    ], workingDirectory: buildDir.path);
     if (configure.exitCode != 0) {
-      stderr.writeln(
-          'can_engine: cmake configure failed\n${configure.stderr}');
+      stderr.writeln('can_engine: cmake configure failed\n${configure.stderr}');
       return;
     }
 
     // Build
-    final buildResult = await Process.run(
-        'cmake',
-        [
-          '--build',
-          '.',
-          '--parallel',
-        ],
-        workingDirectory: buildDir.path);
+    final buildResult = await Process.run('cmake', [
+      '--build',
+      '.',
+      '--parallel',
+    ], workingDirectory: buildDir.path);
     if (buildResult.exitCode != 0) {
       stderr.writeln('can_engine: cmake build failed\n${buildResult.stderr}');
       return;
@@ -60,11 +56,13 @@ void main(List<String> args) async {
 
     final so = Uri.file('${buildDir.path}/libcan_engine.so');
 
-    output.assets.code.add(CodeAsset(
-      package: 'can_engine',
-      name: 'src/can_engine.dart',
-      file: so,
-      linkMode: DynamicLoadingBundled(),
-    ));
+    output.assets.code.add(
+      CodeAsset(
+        package: 'can_engine',
+        name: 'src/can_engine.dart',
+        file: so,
+        linkMode: DynamicLoadingBundled(),
+      ),
+    );
   });
 }

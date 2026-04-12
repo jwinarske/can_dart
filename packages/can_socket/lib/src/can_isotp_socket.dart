@@ -21,11 +21,7 @@ class CanIsotpSocket {
 
   /// Creates an ISO-TP socket bound to [interface_] with the given
   /// transmit [txId] and receive [rxId] CAN IDs.
-  CanIsotpSocket(
-    this.interface_, {
-    required this.txId,
-    required this.rxId,
-  }) {
+  CanIsotpSocket(this.interface_, {required this.txId, required this.rxId}) {
     _fd = Libc.socket(afCan, sockDgram, canIsotp);
     if (_fd < 0) _throwErrno('socket(ISOTP)');
     _bind();
@@ -100,7 +96,12 @@ class CanIsotpSocket {
       opts.ref.rxpadContent = rxpadContent;
       opts.ref.rxExtAddress = rxExtAddress;
       final ret = Libc.setsockopt(
-          _fd, solCanIsotp, canIsotpOpts, opts.cast(), sizeOf<CanIsotpOptions>());
+        _fd,
+        solCanIsotp,
+        canIsotpOpts,
+        opts.cast(),
+        sizeOf<CanIsotpOptions>(),
+      );
       if (ret < 0) _throwErrno('setsockopt(ISOTP_OPTS)');
     } finally {
       calloc.free(opts);
@@ -116,7 +117,12 @@ class CanIsotpSocket {
       fc.ref.stmin = stmin;
       fc.ref.wftmax = wftmax;
       final ret = Libc.setsockopt(
-          _fd, solCanIsotp, canIsotpRecvFc, fc.cast(), sizeOf<CanIsotpFcOptions>());
+        _fd,
+        solCanIsotp,
+        canIsotpRecvFc,
+        fc.cast(),
+        sizeOf<CanIsotpFcOptions>(),
+      );
       if (ret < 0) _throwErrno('setsockopt(ISOTP_RECV_FC)');
     } finally {
       calloc.free(fc);

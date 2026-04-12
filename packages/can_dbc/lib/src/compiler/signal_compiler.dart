@@ -59,12 +59,14 @@ class SignalCompiler {
     }
 
     // Allocate
-    final signalDefs = totalSignals > 0
-        ? calloc<SignalDefNative>(totalSignals)
-        : Pointer<SignalDefNative>.fromAddress(0);
-    final messageDefs = messagesWithSignals.isNotEmpty
-        ? calloc<MessageDefNative>(messagesWithSignals.length)
-        : Pointer<MessageDefNative>.fromAddress(0);
+    final signalDefs =
+        totalSignals > 0
+            ? calloc<SignalDefNative>(totalSignals)
+            : Pointer<SignalDefNative>.fromAddress(0);
+    final messageDefs =
+        messagesWithSignals.isNotEmpty
+            ? calloc<MessageDefNative>(messagesWithSignals.length)
+            : Pointer<MessageDefNative>.fromAddress(0);
 
     // Fill signal defs
     var sigIdx = 0;

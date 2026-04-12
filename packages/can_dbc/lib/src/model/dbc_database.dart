@@ -20,8 +20,8 @@ class DbcDatabase {
     List<DbcNode>? nodes,
     List<DbcMessage>? messages,
     this.busSpeed = 0,
-  })  : nodes = nodes ?? [],
-        messages = messages ?? [];
+  }) : nodes = nodes ?? [],
+       messages = messages ?? [];
 
   /// Look up a message by CAN ID.
   DbcMessage? messageById(int canId) {

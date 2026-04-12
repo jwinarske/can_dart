@@ -1,22 +1,22 @@
 /// Token types for DBC file parsing.
 enum TokenType {
-  keyword,    // VERSION, NS_, BS_, BU_, BO_, SG_, CM_, BA_DEF_, BA_, VAL_, etc.
+  keyword, // VERSION, NS_, BS_, BU_, BO_, SG_, CM_, BA_DEF_, BA_, VAL_, etc.
   identifier, // node names, signal names, message names
-  integer,    // integer literal (possibly negative)
-  float_,     // floating-point literal
-  string,     // quoted string "..."
-  colon,      // :
-  pipe,       // |
-  at,         // @
-  plus,       // +
-  minus,      // -
-  comma,      // ,
-  semicolon,  // ;
-  lparen,     // (
-  rparen,     // )
-  lbracket,   // [
-  rbracket,   // ]
-  eof,        // end of input
+  integer, // integer literal (possibly negative)
+  float_, // floating-point literal
+  string, // quoted string "..."
+  colon, // :
+  pipe, // |
+  at, // @
+  plus, // +
+  minus, // -
+  comma, // ,
+  semicolon, // ;
+  lparen, // (
+  rparen, // )
+  lbracket, // [
+  rbracket, // ]
+  eof, // end of input
 }
 
 /// A token from DBC file lexing.
@@ -34,11 +34,32 @@ class Token {
 
 /// DBC keywords recognized by the tokenizer.
 const _keywords = {
-  'VERSION', 'NS_', 'BS_', 'BU_', 'BO_', 'SG_', 'CM_', 'BA_DEF_',
-  'BA_DEF_DEF_', 'BA_', 'VAL_', 'VAL_TABLE_', 'SG_MUL_VAL_',
-  'BO_TX_BU_', 'SIG_GROUP_', 'SIG_VALTYPE_', 'EV_', 'ENVVAR_DATA_',
-  'SGTYPE_', 'SGTYPE_VAL_', 'BA_REL_', 'BA_DEF_REL_', 'BA_SGTYPE_',
-  'BA_SGTYPE_REL_', 'NS_DESC_', 'FILTER',
+  'VERSION',
+  'NS_',
+  'BS_',
+  'BU_',
+  'BO_',
+  'SG_',
+  'CM_',
+  'BA_DEF_',
+  'BA_DEF_DEF_',
+  'BA_',
+  'VAL_',
+  'VAL_TABLE_',
+  'SG_MUL_VAL_',
+  'BO_TX_BU_',
+  'SIG_GROUP_',
+  'SIG_VALTYPE_',
+  'EV_',
+  'ENVVAR_DATA_',
+  'SGTYPE_',
+  'SGTYPE_VAL_',
+  'BA_REL_',
+  'BA_DEF_REL_',
+  'BA_SGTYPE_',
+  'BA_SGTYPE_REL_',
+  'NS_DESC_',
+  'FILTER',
 };
 
 /// Tokenizer for DBC files.
@@ -74,22 +95,34 @@ class DbcTokenizer {
 
     // Single-character tokens
     switch (ch) {
-      case ':': return _single(TokenType.colon);
-      case '|': return _single(TokenType.pipe);
-      case '@': return _single(TokenType.at);
-      case ',': return _single(TokenType.comma);
-      case ';': return _single(TokenType.semicolon);
-      case '(': return _single(TokenType.lparen);
-      case ')': return _single(TokenType.rparen);
-      case '[': return _single(TokenType.lbracket);
-      case ']': return _single(TokenType.rbracket);
+      case ':':
+        return _single(TokenType.colon);
+      case '|':
+        return _single(TokenType.pipe);
+      case '@':
+        return _single(TokenType.at);
+      case ',':
+        return _single(TokenType.comma);
+      case ';':
+        return _single(TokenType.semicolon);
+      case '(':
+        return _single(TokenType.lparen);
+      case ')':
+        return _single(TokenType.rparen);
+      case '[':
+        return _single(TokenType.lbracket);
+      case ']':
+        return _single(TokenType.rbracket);
     }
 
     // String literal
     if (ch == '"') return _readString();
 
     // Number (including negative)
-    if (_isDigit(ch) || (ch == '-' && _pos + 1 < _source.length && _isDigitOrDot(_source[_pos + 1]))) {
+    if (_isDigit(ch) ||
+        (ch == '-' &&
+            _pos + 1 < _source.length &&
+            _isDigitOrDot(_source[_pos + 1]))) {
       return _readNumber();
     }
 
@@ -121,11 +154,16 @@ class DbcTokenizer {
       if (_source[_pos] == '\\' && _pos + 1 < _source.length) {
         _advance();
         switch (_source[_pos]) {
-          case 'n':  buf.write('\n');
-          case 't':  buf.write('\t');
-          case '\\': buf.write('\\');
-          case '"':  buf.write('"');
-          default:   buf.write(_source[_pos]);
+          case 'n':
+            buf.write('\n');
+          case 't':
+            buf.write('\t');
+          case '\\':
+            buf.write('\\');
+          case '"':
+            buf.write('"');
+          default:
+            buf.write(_source[_pos]);
         }
       } else {
         buf.write(_source[_pos]);
@@ -158,10 +196,12 @@ class DbcTokenizer {
     }
 
     // Scientific notation
-    if (_pos < _source.length && (_source[_pos] == 'e' || _source[_pos] == 'E')) {
+    if (_pos < _source.length &&
+        (_source[_pos] == 'e' || _source[_pos] == 'E')) {
       isFloat = true;
       _advance();
-      if (_pos < _source.length && (_source[_pos] == '+' || _source[_pos] == '-')) {
+      if (_pos < _source.length &&
+          (_source[_pos] == '+' || _source[_pos] == '-')) {
         _advance();
       }
       while (_pos < _source.length && _isDigit(_source[_pos])) {
@@ -176,8 +216,10 @@ class DbcTokenizer {
     // and cantools tolerates them. Rewind and re-tokenize as identifier.
     // Only applies to unsigned integer literals; a signed or fractional
     // literal followed by letters is a genuine malformation.
-    if (!hadSign && !isFloat &&
-        _pos < _source.length && _isIdentStart(_source[_pos])) {
+    if (!hadSign &&
+        !isFloat &&
+        _pos < _source.length &&
+        _isIdentStart(_source[_pos])) {
       _pos = start;
       _col = startCol;
       return _readIdentifier();
@@ -202,7 +244,8 @@ class DbcTokenizer {
     }
 
     final value = _source.substring(start, _pos);
-    final type = _keywords.contains(value) ? TokenType.keyword : TokenType.identifier;
+    final type =
+        _keywords.contains(value) ? TokenType.keyword : TokenType.identifier;
     return Token(type, value, startLine, startCol);
   }
 
@@ -240,19 +283,21 @@ class DbcTokenizer {
     }
   }
 
-  bool _isDigit(String ch) => ch.codeUnitAt(0) >= 0x30 && ch.codeUnitAt(0) <= 0x39;
+  bool _isDigit(String ch) =>
+      ch.codeUnitAt(0) >= 0x30 && ch.codeUnitAt(0) <= 0x39;
   bool _isDigitOrDot(String ch) => _isDigit(ch) || ch == '.';
   bool _isIdentStart(String ch) {
     final c = ch.codeUnitAt(0);
     return (c >= 0x41 && c <= 0x5A) || // A-Z
-           (c >= 0x61 && c <= 0x7A) || // a-z
-           c == 0x5F;                   // _
+        (c >= 0x61 && c <= 0x7A) || // a-z
+        c == 0x5F; // _
   }
+
   bool _isIdentChar(String ch) {
     final c = ch.codeUnitAt(0);
     return (c >= 0x41 && c <= 0x5A) || // A-Z
-           (c >= 0x61 && c <= 0x7A) || // a-z
-           (c >= 0x30 && c <= 0x39) || // 0-9
-           c == 0x5F;                   // _
+        (c >= 0x61 && c <= 0x7A) || // a-z
+        (c >= 0x30 && c <= 0x39) || // 0-9
+        c == 0x5F; // _
   }
 }

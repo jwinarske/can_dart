@@ -13,120 +13,132 @@ class _EngineBindings {
   _EngineBindings(this._lib);
 
   // Lifecycle
-  late final engineCreate = _lib.lookupFunction<
-      Pointer<Void> Function(),
-      Pointer<Void> Function()>('engine_create');
+  late final engineCreate = _lib
+      .lookupFunction<Pointer<Void> Function(), Pointer<Void> Function()>(
+        'engine_create',
+      );
 
   late final engineDestroy = _lib.lookupFunction<
-      Void Function(Pointer<Void>),
-      void Function(Pointer<Void>)>('engine_destroy');
+    Void Function(Pointer<Void>),
+    void Function(Pointer<Void>)
+  >('engine_destroy');
 
   late final engineStart = _lib.lookupFunction<
-      Int32 Function(Pointer<Void>, Pointer<Utf8>),
-      int Function(Pointer<Void>, Pointer<Utf8>)>('engine_start');
+    Int32 Function(Pointer<Void>, Pointer<Utf8>),
+    int Function(Pointer<Void>, Pointer<Utf8>)
+  >('engine_start');
 
   late final engineStop = _lib.lookupFunction<
-      Void Function(Pointer<Void>),
-      void Function(Pointer<Void>)>('engine_stop');
+    Void Function(Pointer<Void>),
+    void Function(Pointer<Void>)
+  >('engine_stop');
 
   // Signal database
   late final engineLoadSignals = _lib.lookupFunction<
-      Void Function(Pointer<Void>, Pointer<Void>, Uint32, Pointer<Void>, Uint32),
-      void Function(Pointer<Void>, Pointer<Void>, int, Pointer<Void>, int)>(
-      'engine_load_signals');
+    Void Function(Pointer<Void>, Pointer<Void>, Uint32, Pointer<Void>, Uint32),
+    void Function(Pointer<Void>, Pointer<Void>, int, Pointer<Void>, int)
+  >('engine_load_signals');
 
   // Snapshot
   late final engineSnapshotPtr = _lib.lookupFunction<
-      Pointer<Void> Function(Pointer<Void>),
-      Pointer<Void> Function(Pointer<Void>)>('engine_snapshot_ptr');
+    Pointer<Void> Function(Pointer<Void>),
+    Pointer<Void> Function(Pointer<Void>)
+  >('engine_snapshot_ptr');
 
   late final engineSequence = _lib.lookupFunction<
-      Uint64 Function(Pointer<Void>),
-      int Function(Pointer<Void>)>('engine_sequence');
+    Uint64 Function(Pointer<Void>),
+    int Function(Pointer<Void>)
+  >('engine_sequence');
 
   // Filter chain
   late final engineSetFilterChain = _lib.lookupFunction<
-      Void Function(Pointer<Void>, Uint32, Pointer<Void>, Uint8),
-      void Function(Pointer<Void>, int, Pointer<Void>, int)>(
-      'engine_set_filter_chain');
+    Void Function(Pointer<Void>, Uint32, Pointer<Void>, Uint8),
+    void Function(Pointer<Void>, int, Pointer<Void>, int)
+  >('engine_set_filter_chain');
 
   late final engineClearFilter = _lib.lookupFunction<
-      Void Function(Pointer<Void>, Uint32),
-      void Function(Pointer<Void>, int)>('engine_clear_filter');
+    Void Function(Pointer<Void>, Uint32),
+    void Function(Pointer<Void>, int)
+  >('engine_clear_filter');
 
   late final engineResetFilters = _lib.lookupFunction<
-      Void Function(Pointer<Void>),
-      void Function(Pointer<Void>)>('engine_reset_filters');
+    Void Function(Pointer<Void>),
+    void Function(Pointer<Void>)
+  >('engine_reset_filters');
 
   // CAN hardware filters
   late final engineSetCanFilters = _lib.lookupFunction<
-      Void Function(Pointer<Void>, Pointer<Void>, Uint32),
-      void Function(Pointer<Void>, Pointer<Void>, int)>(
-      'engine_set_can_filters');
+    Void Function(Pointer<Void>, Pointer<Void>, Uint32),
+    void Function(Pointer<Void>, Pointer<Void>, int)
+  >('engine_set_can_filters');
 
   // TX
   late final engineSendFrame = _lib.lookupFunction<
-      Int32 Function(Pointer<Void>, Uint32, Pointer<Uint8>, Uint8),
-      int Function(Pointer<Void>, int, Pointer<Uint8>, int)>(
-      'engine_send_frame');
+    Int32 Function(Pointer<Void>, Uint32, Pointer<Uint8>, Uint8),
+    int Function(Pointer<Void>, int, Pointer<Uint8>, int)
+  >('engine_send_frame');
 
   late final engineStartPeriodicTx = _lib.lookupFunction<
-      Int32 Function(Pointer<Void>, Uint32, Pointer<Uint8>, Uint8, Uint32),
-      int Function(Pointer<Void>, int, Pointer<Uint8>, int, int)>(
-      'engine_start_periodic_tx');
+    Int32 Function(Pointer<Void>, Uint32, Pointer<Uint8>, Uint8, Uint32),
+    int Function(Pointer<Void>, int, Pointer<Uint8>, int, int)
+  >('engine_start_periodic_tx');
 
   late final engineStopPeriodicTx = _lib.lookupFunction<
-      Void Function(Pointer<Void>, Uint32),
-      void Function(Pointer<Void>, int)>('engine_stop_periodic_tx');
+    Void Function(Pointer<Void>, Uint32),
+    void Function(Pointer<Void>, int)
+  >('engine_stop_periodic_tx');
 
   late final engineStopAllPeriodicTx = _lib.lookupFunction<
-      Void Function(Pointer<Void>),
-      void Function(Pointer<Void>)>('engine_stop_all_periodic_tx');
+    Void Function(Pointer<Void>),
+    void Function(Pointer<Void>)
+  >('engine_stop_all_periodic_tx');
 
   // Signal graphs
   late final engineAddGraphSignal = _lib.lookupFunction<
-      Int32 Function(Pointer<Void>, Uint32),
-      int Function(Pointer<Void>, int)>('engine_add_graph_signal');
+    Int32 Function(Pointer<Void>, Uint32),
+    int Function(Pointer<Void>, int)
+  >('engine_add_graph_signal');
 
   late final engineRemoveGraphSignal = _lib.lookupFunction<
-      Void Function(Pointer<Void>, Uint32),
-      void Function(Pointer<Void>, int)>('engine_remove_graph_signal');
+    Void Function(Pointer<Void>, Uint32),
+    void Function(Pointer<Void>, int)
+  >('engine_remove_graph_signal');
 
   // Display filter
   late final engineSetDisplayFilter = _lib.lookupFunction<
-      Void Function(Pointer<Void>, Pointer<Uint32>, Uint32),
-      void Function(Pointer<Void>, Pointer<Uint32>, int)>(
-      'engine_set_display_filter');
+    Void Function(Pointer<Void>, Pointer<Uint32>, Uint32),
+    void Function(Pointer<Void>, Pointer<Uint32>, int)
+  >('engine_set_display_filter');
 
   late final engineClearDisplayFilter = _lib.lookupFunction<
-      Void Function(Pointer<Void>),
-      void Function(Pointer<Void>)>('engine_clear_display_filter');
+    Void Function(Pointer<Void>),
+    void Function(Pointer<Void>)
+  >('engine_clear_display_filter');
 
   // ISO-TP
   late final engineIsotpOpen = _lib.lookupFunction<
-      Int32 Function(Pointer<Void>, Uint32, Uint32),
-      int Function(Pointer<Void>, int, int)>('engine_isotp_open');
+    Int32 Function(Pointer<Void>, Uint32, Uint32),
+    int Function(Pointer<Void>, int, int)
+  >('engine_isotp_open');
 
   late final engineIsotpClose = _lib.lookupFunction<
-      Void Function(Pointer<Void>),
-      void Function(Pointer<Void>)>('engine_isotp_close');
+    Void Function(Pointer<Void>),
+    void Function(Pointer<Void>)
+  >('engine_isotp_close');
 
   late final engineIsotpSend = _lib.lookupFunction<
-      Int32 Function(Pointer<Void>, Pointer<Uint8>, Uint32),
-      int Function(Pointer<Void>, Pointer<Uint8>, int)>('engine_isotp_send');
+    Int32 Function(Pointer<Void>, Pointer<Uint8>, Uint32),
+    int Function(Pointer<Void>, Pointer<Uint8>, int)
+  >('engine_isotp_send');
 
   late final engineIsotpRecv = _lib.lookupFunction<
-      Int32 Function(Pointer<Void>, Pointer<Uint8>, Uint32, Int32),
-      int Function(Pointer<Void>, Pointer<Uint8>, int, int)>('engine_isotp_recv');
+    Int32 Function(Pointer<Void>, Pointer<Uint8>, Uint32, Int32),
+    int Function(Pointer<Void>, Pointer<Uint8>, int, int)
+  >('engine_isotp_recv');
 }
 
 /// Filter types matching C++ FilterType enum.
-enum FilterType {
-  none,
-  ema,
-  rateLimit,
-  hysteresis,
-}
+enum FilterType { none, ema, rateLimit, hysteresis }
 
 /// Zero-copy CAN engine.
 ///
@@ -248,7 +260,10 @@ class CanEngine {
   // ── Filter chain ──
 
   /// Set a filter chain on a signal.
-  void setFilterChain(int signalIndex, List<({FilterType type, double param})> filters) {
+  void setFilterChain(
+    int signalIndex,
+    List<({FilterType type, double param})> filters,
+  ) {
     _checkValid();
     final ptr = calloc<FilterConfigNative>(filters.length);
     try {
@@ -257,7 +272,11 @@ class CanEngine {
         (ptr + i).ref.param = filters[i].param;
       }
       _bindings.engineSetFilterChain(
-          _handle, signalIndex, ptr.cast(), filters.length);
+        _handle,
+        signalIndex,
+        ptr.cast(),
+        filters.length,
+      );
     } finally {
       calloc.free(ptr);
     }
@@ -300,7 +319,12 @@ class CanEngine {
         ptr[i] = data[i];
       }
       return _bindings.engineStartPeriodicTx(
-          _handle, canId, ptr, data.length, intervalMs);
+        _handle,
+        canId,
+        ptr,
+        data.length,
+        intervalMs,
+      );
     } finally {
       calloc.free(ptr);
     }
@@ -398,7 +422,11 @@ class CanEngine {
     final buf = calloc<Uint8>(maxPduSize);
     try {
       final nbytes = _bindings.engineIsotpRecv(
-          _handle, buf, maxPduSize, timeoutMs);
+        _handle,
+        buf,
+        maxPduSize,
+        timeoutMs,
+      );
       if (nbytes <= 0) return Uint8List(0);
       final result = Uint8List(nbytes);
       for (var i = 0; i < nbytes; i++) {

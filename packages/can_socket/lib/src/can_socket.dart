@@ -119,8 +119,7 @@ class CanSocket {
 
     if (filters.isEmpty) {
       // Setting zero filters blocks everything
-      final ret = Libc.setsockopt(
-          _fd, solCanRaw, canRawFilter, nullptr, 0);
+      final ret = Libc.setsockopt(_fd, solCanRaw, canRawFilter, nullptr, 0);
       if (ret < 0) _throwErrno('setsockopt(CAN_RAW_FILTER)');
       return;
     }
@@ -224,7 +223,13 @@ class CanSocket {
     final ptr = calloc<Int32>();
     try {
       ptr.value = value;
-      final ret = Libc.setsockopt(_fd, level, optname, ptr.cast(), sizeOf<Int32>());
+      final ret = Libc.setsockopt(
+        _fd,
+        level,
+        optname,
+        ptr.cast(),
+        sizeOf<Int32>(),
+      );
       if (ret < 0) _throwErrno('setsockopt($optname)');
     } finally {
       calloc.free(ptr);
@@ -283,11 +288,7 @@ class CanSocket {
 
     Isolate.spawn(
       _frameReadLoop,
-      _IsolateConfig(
-        fd: _fd,
-        sendPort: receivePort.sendPort,
-        canFd: canFd,
-      ),
+      _IsolateConfig(fd: _fd, sendPort: receivePort.sendPort, canFd: canFd),
     ).then((iso) {
       isolate = iso;
     });
@@ -301,9 +302,10 @@ class CanSocket {
     pollfd.ref.fd = config.fd;
     pollfd.ref.events = pollIn;
 
-    final framePtr = config.canFd
-        ? calloc<CanFdFrameNative>().cast<Void>()
-        : calloc<CanFrameNative>().cast<Void>();
+    final framePtr =
+        config.canFd
+            ? calloc<CanFdFrameNative>().cast<Void>()
+            : calloc<CanFrameNative>().cast<Void>();
 
     final frameSize =
         config.canFd ? sizeOf<CanFdFrameNative>() : sizeOf<CanFrameNative>();
@@ -327,14 +329,17 @@ class CanSocket {
         if (config.canFd) {
           if (nbytes == sizeOf<CanFrameNative>()) {
             config.sendPort.send(
-                CanFrame.fromNative(framePtr.cast<CanFrameNative>().ref));
+              CanFrame.fromNative(framePtr.cast<CanFrameNative>().ref),
+            );
           } else {
             config.sendPort.send(
-                CanFrame.fromFdNative(framePtr.cast<CanFdFrameNative>().ref));
+              CanFrame.fromFdNative(framePtr.cast<CanFdFrameNative>().ref),
+            );
           }
         } else {
           config.sendPort.send(
-              CanFrame.fromNative(framePtr.cast<CanFrameNative>().ref));
+            CanFrame.fromNative(framePtr.cast<CanFrameNative>().ref),
+          );
         }
       }
     } finally {

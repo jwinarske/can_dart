@@ -64,7 +64,16 @@ void main() {
       final frame = CanFrame(
         id: 0x1ABCDEF0,
         isExtended: true,
-        data: Uint8List.fromList([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]),
+        data: Uint8List.fromList([
+          0x01,
+          0x02,
+          0x03,
+          0x04,
+          0x05,
+          0x06,
+          0x07,
+          0x08,
+        ]),
       );
 
       sender.send(frame);
@@ -128,10 +137,7 @@ void main() {
       // Give the isolate time to start
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
-      sender.send(CanFrame(
-        id: 0x333,
-        data: Uint8List.fromList([0x11, 0x22]),
-      ));
+      sender.send(CanFrame(id: 0x333, data: Uint8List.fromList([0x11, 0x22])));
 
       final received = await completer.future.timeout(
         const Duration(seconds: 2),
@@ -157,12 +163,7 @@ void main() {
         data[i] = i;
       }
 
-      final frame = CanFrame(
-        id: 0x456,
-        isFd: true,
-        isBrs: true,
-        data: data,
-      );
+      final frame = CanFrame(id: 0x456, isFd: true, isBrs: true, data: data);
 
       sender.send(frame);
       final received = receiver.receive(timeoutMs: 1000);
@@ -196,8 +197,10 @@ void main() {
       final socket = CanSocket(vcanInterface);
       socket.close();
 
-      expect(() => socket.send(CanFrame(id: 0, data: Uint8List(0))),
-          throwsStateError);
+      expect(
+        () => socket.send(CanFrame(id: 0, data: Uint8List(0))),
+        throwsStateError,
+      );
       expect(() => socket.receive(), throwsStateError);
     });
 
@@ -212,10 +215,7 @@ void main() {
 
       const count = 10;
       for (var i = 0; i < count; i++) {
-        sender.send(CanFrame(
-          id: 0x100 + i,
-          data: Uint8List.fromList([i]),
-        ));
+        sender.send(CanFrame(id: 0x100 + i, data: Uint8List.fromList([i])));
       }
 
       for (var i = 0; i < count; i++) {
