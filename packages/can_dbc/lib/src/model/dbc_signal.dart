@@ -21,11 +21,21 @@ enum MultiplexType {
   /// Not multiplexed.
   none,
 
-  /// This signal is the multiplexer selector.
+  /// This signal is the (root) multiplexer selector. DBC indicator `M`.
   multiplexer,
 
-  /// This signal is multiplexed by the selector.
+  /// This signal is multiplexed by a parent selector. DBC indicator `m<N>`.
   multiplexed,
+
+  /// Extended multiplexing: this signal is both multiplexed by a parent
+  /// selector (value in [multiplexValue]) AND is itself a sub-mux selector
+  /// for its own children. DBC indicator `m<N>M`.
+  ///
+  /// Extended multiplexing forms a tree: a child is active only when every
+  /// ancestor selector resolves to the child's branch. The activation range
+  /// lists are declared separately with `SG_MUL_VAL_` sections, which the
+  /// parser currently consumes but does not model.
+  extendedMultiplexor,
 }
 
 /// A signal definition from a DBC file.
@@ -72,7 +82,9 @@ class DbcSignal {
   /// Multiplexing type.
   final MultiplexType multiplexType;
 
-  /// Multiplexer value (only valid when multiplexType == multiplexed).
+  /// Value of the parent selector for which this signal is active.
+  /// Valid when [multiplexType] is [MultiplexType.multiplexed] or
+  /// [MultiplexType.extendedMultiplexor]; null otherwise.
   final int? multiplexValue;
 
   DbcSignal({

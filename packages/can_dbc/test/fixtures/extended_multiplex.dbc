@@ -1,0 +1,24 @@
+VERSION ""
+
+NS_ :
+ SG_MUL_VAL_
+
+BS_:
+
+BU_: Tester ECU
+
+BO_ 2024 OBD2: 8 Tester
+ SG_ service M : 11|4@0+ (1,0) [0|15] "" ECU
+ SG_ response : 15|4@0+ (1,0) [0|15] "" ECU
+ SG_ length : 7|8@0+ (1,0) [0|255] "" ECU
+ SG_ ParameterID_Service01 m1M : 23|8@0+ (1,0) [0|255] "" ECU
+ SG_ ParameterID_Service02 m2M : 23|8@0+ (1,0) [0|255] "" ECU
+ SG_ S1_PID_0C_EngineRPM m12 : 31|16@0+ (0.25,0) [0|16383.75] "rpm" ECU
+ SG_ S1_PID_0D_VehicleSpeed m13 : 31|8@0+ (1,0) [0|255] "km/h" ECU
+ SG_ S2_PID_02_FreezeDTC m2 : 31|16@0+ (1,0) [0|65535] "" ECU
+
+SG_MUL_VAL_ 2024 ParameterID_Service01 service 1-1;
+SG_MUL_VAL_ 2024 ParameterID_Service02 service 2-2;
+SG_MUL_VAL_ 2024 S1_PID_0C_EngineRPM ParameterID_Service01 12-12;
+SG_MUL_VAL_ 2024 S1_PID_0D_VehicleSpeed ParameterID_Service01 13-13;
+SG_MUL_VAL_ 2024 S2_PID_02_FreezeDTC ParameterID_Service02 2-2;

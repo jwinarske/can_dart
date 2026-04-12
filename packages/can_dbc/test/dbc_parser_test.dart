@@ -47,11 +47,11 @@ void main() {
       final types = tokens.map((t) => t.type).toList();
       expect(types, [
         TokenType.integer, // 0
-        TokenType.pipe,    // |
+        TokenType.pipe, // |
         TokenType.integer, // 16
-        TokenType.at,      // @
+        TokenType.at, // @
         TokenType.integer, // 1
-        TokenType.plus,    // +
+        TokenType.plus, // +
         TokenType.eof,
       ]);
     });
@@ -82,7 +82,10 @@ void main() {
 
     test('parses nodes', () {
       expect(db.nodes.length, 3);
-      expect(db.nodes.map((n) => n.name), containsAll(['ECU1', 'ECU2', 'Diag']));
+      expect(
+        db.nodes.map((n) => n.name),
+        containsAll(['ECU1', 'ECU2', 'Diag']),
+      );
     });
 
     test('parses node comments', () {
@@ -206,6 +209,66 @@ void main() {
     });
   });
 
+  group('DbcParser - extended_multiplex.dbc (m<N>M)', () {
+    late DbcDatabase db;
+
+    setUpAll(() {
+      final content =
+          File('test/fixtures/extended_multiplex.dbc').readAsStringSync();
+      db = DbcParser().parse(content);
+    });
+
+    test('root mux selector parses as multiplexer', () {
+      final msg = db.messageById(2024)!;
+      final service = msg.signals.firstWhere((s) => s.name == 'service');
+      expect(service.multiplexType, MultiplexType.multiplexer);
+      expect(service.multiplexValue, isNull);
+    });
+
+    test('m<N>M parses as extendedMultiplexor with selector value', () {
+      final msg = db.messageById(2024)!;
+      final pid1 = msg.signals.firstWhere(
+        (s) => s.name == 'ParameterID_Service01',
+      );
+      expect(pid1.multiplexType, MultiplexType.extendedMultiplexor);
+      expect(pid1.multiplexValue, 1);
+
+      final pid2 = msg.signals.firstWhere(
+        (s) => s.name == 'ParameterID_Service02',
+      );
+      expect(pid2.multiplexType, MultiplexType.extendedMultiplexor);
+      expect(pid2.multiplexValue, 2);
+    });
+
+    test('m<N> leaves under an extended mux still parse as multiplexed', () {
+      final msg = db.messageById(2024)!;
+      final rpm = msg.signals.firstWhere(
+        (s) => s.name == 'S1_PID_0C_EngineRPM',
+      );
+      expect(rpm.multiplexType, MultiplexType.multiplexed);
+      expect(rpm.multiplexValue, 12);
+
+      final dtc = msg.signals.firstWhere(
+        (s) => s.name == 'S2_PID_02_FreezeDTC',
+      );
+      expect(dtc.multiplexType, MultiplexType.multiplexed);
+      expect(dtc.multiplexValue, 2);
+    });
+
+    test('non-mux signals alongside extended mux are unmarked', () {
+      final msg = db.messageById(2024)!;
+      final resp = msg.signals.firstWhere((s) => s.name == 'response');
+      expect(resp.multiplexType, MultiplexType.none);
+      expect(resp.multiplexValue, isNull);
+    });
+
+    test('SG_MUL_VAL_ sections are tolerated (not yet modelled)', () {
+      // The fixture contains 5 SG_MUL_VAL_ rows; parse succeeded in setUpAll,
+      // which is the whole assertion here — they must not trip the parser.
+      expect(db.messages, isNotEmpty);
+    });
+  });
+
   group('DbcParser - motorola.dbc', () {
     late DbcDatabase db;
 
@@ -247,7 +310,10 @@ void main() {
 
     test('message comments', () {
       final msg = db.messageById(600)!;
-      expect(msg.comment, 'Message with Motorola (big-endian) byte order signals');
+      expect(
+        msg.comment,
+        'Message with Motorola (big-endian) byte order signals',
+      );
     });
   });
 

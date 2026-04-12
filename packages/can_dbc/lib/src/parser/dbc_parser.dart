@@ -22,7 +22,7 @@ class DbcParseException implements Exception {
 ///
 /// Handles: VERSION, NS_, BS_, BU_, BO_, SG_, CM_, BA_DEF_, BA_DEF_DEF_,
 /// BA_, VAL_, VAL_TABLE_, SIG_GROUP_, SIG_VALTYPE_, BO_TX_BU_,
-/// multiplexed signals (M, `m<N>`).
+/// multiplexed signals (`M`, `m<N>`, and extended `m<N>M`).
 class DbcParser {
   late List<Token> _tokens;
   int _pos = 0;
@@ -73,22 +73,38 @@ class DbcParser {
 
     if (token.type == TokenType.keyword) {
       switch (token.value) {
-        case 'VERSION':    _parseVersion();
-        case 'NS_':        _parseNs();
-        case 'BS_':        _parseBs();
-        case 'BU_':        _parseBu();
-        case 'BO_':        _parseBo();
-        case 'CM_':        _parseCm();
-        case 'BA_DEF_':    _parseBaDef();
-        case 'BA_DEF_DEF_': _parseBaDefDef();
-        case 'BA_':        _parseBa();
-        case 'VAL_':       _parseVal();
-        case 'VAL_TABLE_': _parseValTable();
-        case 'SIG_GROUP_': _parseSigGroup();
-        case 'SIG_VALTYPE_': _parseSigValType();
-        case 'BO_TX_BU_':  _parseBoTxBu();
-        case 'SG_MUL_VAL_': _parseSgMulVal();
-        default:           _advance(); // skip unknown keyword
+        case 'VERSION':
+          _parseVersion();
+        case 'NS_':
+          _parseNs();
+        case 'BS_':
+          _parseBs();
+        case 'BU_':
+          _parseBu();
+        case 'BO_':
+          _parseBo();
+        case 'CM_':
+          _parseCm();
+        case 'BA_DEF_':
+          _parseBaDef();
+        case 'BA_DEF_DEF_':
+          _parseBaDefDef();
+        case 'BA_':
+          _parseBa();
+        case 'VAL_':
+          _parseVal();
+        case 'VAL_TABLE_':
+          _parseValTable();
+        case 'SIG_GROUP_':
+          _parseSigGroup();
+        case 'SIG_VALTYPE_':
+          _parseSigValType();
+        case 'BO_TX_BU_':
+          _parseBoTxBu();
+        case 'SG_MUL_VAL_':
+          _parseSgMulVal();
+        default:
+          _advance(); // skip unknown keyword
       }
     } else {
       _advance(); // skip unexpected token
@@ -202,6 +218,7 @@ class DbcParser {
     if (_check(TokenType.identifier)) {
       final muxStr = _current.value;
       if (muxStr == 'M') {
+        // Root multiplexer.
         muxType = MultiplexType.multiplexer;
         _advance();
       } else if (muxStr == 'm') {
@@ -212,10 +229,20 @@ class DbcParser {
         muxType = MultiplexType.multiplexed;
         _advance();
       } else if (muxStr.startsWith('m') && muxStr.length > 1) {
-        final numPart = muxStr.substring(1);
+        // Either `m<N>` (leaf multiplexed) or `m<N>M` (extended mux —
+        // both multiplexed by <N> and itself a selector for children,
+        // e.g. OBD2.dbc's per-service PID selectors).
+        final isExtended = muxStr.endsWith('M');
+        final numPart =
+            isExtended
+                ? muxStr.substring(1, muxStr.length - 1)
+                : muxStr.substring(1);
         final parsed = int.tryParse(numPart);
         if (parsed != null) {
-          muxType = MultiplexType.multiplexed;
+          muxType =
+              isExtended
+                  ? MultiplexType.extendedMultiplexor
+                  : MultiplexType.multiplexed;
           muxValue = parsed;
           _advance();
         }
@@ -232,7 +259,8 @@ class DbcParser {
     // Byte order + value type: 0+ (BE unsigned), 1+ (LE unsigned),
     // 0- (BE signed), 1- (LE signed)
     final orderChar = _expectInt();
-    final byteOrder = orderChar == 1 ? ByteOrder.littleEndian : ByteOrder.bigEndian;
+    final byteOrder =
+        orderChar == 1 ? ByteOrder.littleEndian : ByteOrder.bigEndian;
 
     ValueType valueType;
     if (_check(TokenType.plus)) {
@@ -264,8 +292,7 @@ class DbcParser {
 
     // Receivers
     final receivers = <String>[];
-    while (!_isAtEnd &&
-        _current.type == TokenType.identifier) {
+    while (!_isAtEnd && _current.type == TokenType.identifier) {
       receivers.add(_current.value);
       _advance();
       if (_check(TokenType.comma)) _advance();
@@ -436,9 +463,22 @@ class DbcParser {
   bool get _isSection =>
       _current.type == TokenType.keyword &&
       const {
-        'VERSION', 'NS_', 'BS_', 'BU_', 'BO_', 'CM_', 'BA_DEF_',
-        'BA_DEF_DEF_', 'BA_', 'VAL_', 'VAL_TABLE_', 'SIG_GROUP_',
-        'SIG_VALTYPE_', 'BO_TX_BU_', 'SG_MUL_VAL_', 'EV_',
+        'VERSION',
+        'NS_',
+        'BS_',
+        'BU_',
+        'BO_',
+        'CM_',
+        'BA_DEF_',
+        'BA_DEF_DEF_',
+        'BA_',
+        'VAL_',
+        'VAL_TABLE_',
+        'SIG_GROUP_',
+        'SIG_VALTYPE_',
+        'BO_TX_BU_',
+        'SG_MUL_VAL_',
+        'EV_',
       }.contains(_current.value);
 
   void _advance() {
