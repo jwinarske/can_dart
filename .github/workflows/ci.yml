@@ -1,0 +1,213 @@
+# CI for the can_dart monorepo.
+#
+# Patterned after https://github.com/jwinarske/pw_dart/blob/main/.github/workflows/ci.yml
+# with added coverage collection and codecov upload.
+#
+# Jobs:
+#   format        — dart format across every package
+#   analyze       — dart analyze --fatal-infos (matrix per package)
+#   test          — dart test --coverage (matrix per package), uploads lcov to codecov
+#   clang-format  — clang-format --dry-run on all C++ under packages/*/src,ffi
+#   clang-tidy    — clang-tidy (advisory; continue-on-error, like pw_dart)
+#
+# Native-asset packages (can_engine, j1939) invoke their hook/build.dart during
+# `dart test`, which in turn drives CMake. The runner's default gcc + cmake
+# (ubuntu-24.04 ships gcc-13 + cmake-3.28) satisfy the C++23 requirement.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - name: dart format
+        run: |
+          set -e
+          for pkg in packages/can_socket packages/can_dbc packages/can_engine packages/j1939; do
+            echo "::group::dart format $pkg"
+            (cd "$pkg" && dart pub get --offline 2>/dev/null || (cd "$pkg" && dart pub get))
+            (cd "$pkg" && dart format --output=none --set-exit-if-changed .)
+            echo "::endgroup::"
+          done
+
+  analyze:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [can_socket, can_dbc, can_engine, j1939]
+    defaults:
+      run:
+        working-directory: packages/${{ matrix.package }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - name: Install native build toolchain
+        # Needed because `dart pub get` on packages with a native-asset hook
+        # does not yet compile the .so — but `dart analyze` against a package
+        # whose lib/ references hook-built artifacts still requires the Dart
+        # SDK's FFI resolution to complete, and some transitive cmake checks
+        # need cmake/ninja available when the analyzer materialises hooks.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build build-essential
+      - run: dart pub get
+      - run: dart analyze --fatal-infos
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [can_socket, can_dbc, can_engine, j1939]
+    defaults:
+      run:
+        working-directory: packages/${{ matrix.package }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install native build toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build build-essential lcov
+
+      - name: Bring up vcan0
+        # Required by can_socket/can_socket_vcan_test.dart and by any
+        # j1939 / can_engine integration test that binds to a CAN iface.
+        run: |
+          sudo modprobe vcan
+          sudo ip link add dev vcan0 type vcan || true
+          sudo ip link set up vcan0
+          ip -details -brief link show vcan0
+
+      - run: dart pub get
+
+      - name: Run tests with coverage
+        run: dart test --coverage=coverage
+
+      - name: Format coverage as lcov
+        run: |
+          dart pub global activate coverage
+          dart pub global run coverage:format_coverage \
+            --lcov \
+            --in=coverage \
+            --out=coverage/lcov.info \
+            --packages=.dart_tool/package_config.json \
+            --report-on=lib
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: packages/${{ matrix.package }}/coverage/lcov.info
+          flags: ${{ matrix.package }}
+          name: ${{ matrix.package }}
+          fail_ci_if_error: false
+          # Public-repo uploads work without a token but may rate-limit; set
+          # CODECOV_TOKEN as a repo secret to use the tokened upload path.
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  native-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: j1939
+            cmake_flag: J1939_BUILD_TESTING
+            coverage_flag: J1939_ENABLE_COVERAGE
+          - package: can_engine
+            cmake_flag: CAN_ENGINE_BUILD_TESTING
+            coverage_flag: CAN_ENGINE_ENABLE_COVERAGE
+    defaults:
+      run:
+        working-directory: packages/${{ matrix.package }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build build-essential gcovr
+
+      - name: Configure with testing + coverage
+        run: |
+          cmake -S . -B build-test -GNinja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -D${{ matrix.cmake_flag }}=ON \
+            -D${{ matrix.coverage_flag }}=ON
+
+      - name: Build
+        run: cmake --build build-test --parallel
+
+      - name: Run CTest
+        run: ctest --test-dir build-test --output-on-failure
+
+      - name: Generate lcov from gcov
+        run: |
+          gcovr --root . --filter 'src/' \
+            --exclude 'build-test/_deps/' \
+            --lcov coverage-cpp.lcov
+
+      - name: Upload C++ coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: packages/${{ matrix.package }}/coverage-cpp.lcov
+          flags: ${{ matrix.package }}-cpp
+          name: ${{ matrix.package }}-cpp
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+      - name: Check C++ formatting
+        run: |
+          find packages/can_engine/src packages/j1939/src packages/j1939/ffi \
+            -type f \( -name '*.cpp' -o -name '*.cc' -o -name '*.hpp' -o -name '*.h' \) \
+            -not -name 'dart_api_dl*' \
+            -print0 | xargs -0 --no-run-if-empty clang-format --dry-run --Werror
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    # Native CMake builds are normally driven by hook/build.dart and pass
+    # -DDART_SDK at configure time, which a standalone clang-tidy job can't
+    # easily reproduce. Advisory only, like pw_dart.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-tidy + deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy cmake ninja-build build-essential
+      - uses: dart-lang/setup-dart@v1
+      - name: Generate compile_commands.json (can_engine)
+        run: |
+          cd packages/can_engine
+          cmake -S . -B build -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release
+      - name: Generate compile_commands.json (j1939)
+        run: |
+          cd packages/j1939
+          DART_SDK="$(dirname "$(dirname "$(readlink -f "$(which dart)")")")"
+          cmake -S . -B build -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_BUILD_TYPE=Release -DDART_SDK="$DART_SDK"
+      - name: Run clang-tidy (can_engine)
+        run: |
+          find packages/can_engine/src -type f \( -name '*.cpp' -o -name '*.hpp' \) -print0 \
+            | xargs -0 --no-run-if-empty clang-tidy -p packages/can_engine/build --extra-arg=-std=c++23 || true
+      - name: Run clang-tidy (j1939)
+        run: |
+          find packages/j1939/src packages/j1939/ffi -type f \( -name '*.cpp' -o -name '*.hpp' \) -print0 \
+            | xargs -0 --no-run-if-empty clang-tidy -p packages/j1939/build --extra-arg=-std=c++23 || true

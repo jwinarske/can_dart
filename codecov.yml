@@ -1,0 +1,82 @@
+# Codecov configuration for the can_dart monorepo.
+#
+# Each package uploads with its own flag (see .github/workflows/ci.yml) so
+# coverage reports carry per-package breakdowns.
+
+coverage:
+  # Round the rate to 1 decimal place in the PR comment.
+  precision: 1
+  round: nearest
+  range: "70...95"
+
+  status:
+    project:
+      default:
+        # Require overall coverage not to drop by more than 1 percentage
+        # point on any PR. Matches what most Dart monorepos settle on.
+        target: auto
+        threshold: 1%
+        informational: false
+      can_socket:
+        flags: [can_socket]
+        target: auto
+        threshold: 1%
+      can_dbc:
+        flags: [can_dbc]
+        target: auto
+        threshold: 1%
+      can_engine:
+        flags: [can_engine]
+        target: auto
+        threshold: 1%
+      j1939:
+        flags: [j1939]
+        target: auto
+        threshold: 1%
+
+    patch:
+      default:
+        # New code added in a PR must itself be at least 80% covered.
+        target: 80%
+        threshold: 5%
+
+flags:
+  can_socket:
+    paths:
+      - packages/can_socket/lib/
+    carryforward: true
+  can_dbc:
+    paths:
+      - packages/can_dbc/lib/
+    carryforward: true
+  can_engine:
+    paths:
+      - packages/can_engine/lib/
+    carryforward: true
+  can_engine-cpp:
+    paths:
+      - packages/can_engine/src/
+    carryforward: true
+  j1939:
+    paths:
+      - packages/j1939/lib/
+    carryforward: true
+  j1939-cpp:
+    paths:
+      - packages/j1939/src/
+      - packages/j1939/ffi/
+    carryforward: true
+
+# Exclude generated or non-source paths from the report.
+ignore:
+  - "**/.dart_tool/**"
+  - "**/build/**"
+  - "**/test/**"
+  - "**/bin/**"
+  - "**/hook/**"
+  - "examples/**"
+
+comment:
+  layout: "header, diff, flags, components, files"
+  behavior: default
+  require_changes: false
