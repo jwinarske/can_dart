@@ -1,0 +1,37 @@
+VERSION "2.0"
+
+NS_ :
+
+BS_: 500000
+
+BU_: ECU1 ECU2
+
+BO_ 100 EngineData: 8 ECU1
+ SG_ RPM : 0|16@1+ (0.25,0) [0|16383.75] "rpm" ECU2
+ SG_ Temp : 16|8@1- (1,-40) [-40|215] "degC" ECU2
+
+BO_ 200 TransData: 8 ECU2
+ SG_ Gear : 0|4@1+ (1,0) [0|15] "" ECU1
+
+CM_ BU_ ECU1 "Engine control unit";
+CM_ BO_ 100 "Engine data message";
+CM_ SG_ 100 RPM "Engine speed in revolutions per minute";
+CM_ "Global database comment";
+
+BA_DEF_ SG_ "SystemSignalLongSymbol" STRING;
+BA_DEF_ BO_ "SystemMessageLongSymbol" STRING;
+BA_DEF_DEF_ "SystemSignalLongSymbol" "";
+BA_DEF_DEF_ "SystemMessageLongSymbol" "";
+
+BA_ "SystemMessageLongSymbol" BO_ 100 "EngineDataMsg";
+
+VAL_ 200 Gear 0 "Park" 1 "Reverse" 2 "Neutral" 3 "Drive" ;
+
+VAL_TABLE_ GearNames 0 "P" 1 "R" 2 "N" 3 "D" ;
+
+SIG_GROUP_ 100 EngineGroup 1 : RPM Temp;
+
+SIG_VALTYPE_ 100 RPM : 1;
+
+BO_TX_BU_ 100 : ECU1;
+

@@ -445,4 +445,188 @@ BO_ 100 TestMsg: 1 Vector_XXX
       expect(db.messages.first.signals.first.name, 'TestSig');
     });
   });
+
+  group('DbcParser - full_sections.dbc (coverage of all DBC sections)', () {
+    late DbcDatabase db;
+
+    setUpAll(() {
+      final content =
+          File('test/fixtures/full_sections.dbc').readAsStringSync();
+      db = DbcParser().parse(content);
+    });
+
+    test('parses bus speed from BS_ section', () {
+      expect(db.busSpeed, 500000);
+    });
+
+    test('parses BA_DEF_ / BA_DEF_DEF_ / BA_ without error', () {
+      // These sections are consumed (skipped to semicolon) — the test
+      // validates they don't trip the parser. Attribute values are not
+      // yet modelled.
+      expect(db.messages, isNotEmpty);
+    });
+
+    test('parses VAL_ and attaches value descriptions', () {
+      final gear = db.messageById(200)!.signals.firstWhere(
+        (s) => s.name == 'Gear',
+      );
+      expect(gear.valueDescriptions, isNotNull);
+      expect(gear.valueDescriptions![0], 'Park');
+      expect(gear.valueDescriptions![3], 'Drive');
+    });
+
+    test('parses VAL_TABLE_ without error', () {
+      expect(db.messages, isNotEmpty);
+    });
+
+    test('parses SIG_GROUP_ without error', () {
+      expect(db.messages, isNotEmpty);
+    });
+
+    test('parses SIG_VALTYPE_ without error', () {
+      expect(db.messages, isNotEmpty);
+    });
+
+    test('parses BO_TX_BU_ without error', () {
+      expect(db.messages, isNotEmpty);
+    });
+
+    test('parses global comment (CM_ without qualifier)', () {
+      // Global comments are skipped — just must not crash.
+      expect(db.messages, isNotEmpty);
+    });
+
+    test('parses node comment', () {
+      final ecu1 = db.nodes.firstWhere((n) => n.name == 'ECU1');
+      expect(ecu1.comment, 'Engine control unit');
+    });
+
+    test('parses signed signal correctly', () {
+      final temp = db.messageById(100)!.signals.firstWhere(
+        (s) => s.name == 'Temp',
+      );
+      expect(temp.valueType, ValueType.signed);
+      expect(temp.offset, -40);
+    });
+  });
+
+  group('model toString() coverage', () {
+    test('DbcDatabase.toString', () {
+      final db = DbcDatabase(
+        version: '1.0',
+        nodes: [DbcNode(name: 'N1')],
+        messages: [
+          DbcMessage(id: 100, name: 'M1', length: 8, signals: [
+            DbcSignal(
+              name: 'S1',
+              startBit: 0,
+              length: 8,
+              byteOrder: ByteOrder.littleEndian,
+              valueType: ValueType.unsigned,
+              factor: 1,
+              offset: 0,
+              minimum: 0,
+              maximum: 255,
+              unit: '',
+              receivers: [],
+            ),
+          ]),
+        ],
+      );
+      expect(db.toString(), contains('version=1.0'));
+      expect(db.toString(), contains('1 nodes'));
+      expect(db.toString(), contains('1 messages'));
+      expect(db.toString(), contains('1 signals'));
+    });
+
+    test('DbcMessage.toString', () {
+      final msg = DbcMessage(id: 0x1FF, name: 'TestMsg', length: 8);
+      expect(msg.toString(), contains('1FF'));
+      expect(msg.toString(), contains('TestMsg'));
+      expect(msg.toString(), contains('dlc=8'));
+    });
+
+    test('DbcSignal.toString', () {
+      final sig = DbcSignal(
+        name: 'RPM',
+        startBit: 0,
+        length: 16,
+        byteOrder: ByteOrder.littleEndian,
+        valueType: ValueType.unsigned,
+        factor: 0.25,
+        offset: 0,
+        minimum: 0,
+        maximum: 16383.75,
+        unit: 'rpm',
+        receivers: ['ECU2'],
+      );
+      expect(sig.toString(), contains('RPM'));
+      expect(sig.toString(), contains('LE'));
+      expect(sig.toString(), contains('unsigned'));
+      expect(sig.toString(), contains('factor=0.25'));
+      expect(sig.toString(), contains('rpm'));
+    });
+
+    test('DbcSignal.toString for signed BE signal', () {
+      final sig = DbcSignal(
+        name: 'Temp',
+        startBit: 7,
+        length: 8,
+        byteOrder: ByteOrder.bigEndian,
+        valueType: ValueType.signed,
+        factor: 1,
+        offset: -40,
+        minimum: -40,
+        maximum: 215,
+        unit: 'degC',
+        receivers: [],
+      );
+      expect(sig.toString(), contains('BE'));
+      expect(sig.toString(), contains('signed'));
+    });
+
+    test('DbcNode.toString', () {
+      final node = DbcNode(name: 'ECU1');
+      expect(node.toString(), 'DbcNode(ECU1)');
+    });
+
+    test('DbcDatabase.messageById returns null for missing ID', () {
+      final db = DbcDatabase();
+      expect(db.messageById(999), isNull);
+    });
+  });
+
+  group('DbcParseException', () {
+    test('toString includes message, line, and column', () {
+      final ex = DbcParseException('bad token', 10, 5);
+      expect(ex.toString(), 'DbcParseException: bad token at 10:5');
+    });
+
+    test('parser throws DbcParseException on malformed input', () {
+      expect(
+        () => DbcParser().parse('BO_ notanumber BadMsg: 8 Node'),
+        throwsA(
+          isA<DbcParseException>().having((e) => e.message, 'message',
+              contains('Expected integer')),
+        ),
+      );
+    });
+  });
+
+  group('Token toString', () {
+    test('formats type, value, and position', () {
+      final t = Token(TokenType.keyword, 'VERSION', 1, 1);
+      expect(t.toString(), 'Token(TokenType.keyword, "VERSION", 1:1)');
+    });
+  });
+
+  group('Tokenizer edge cases', () {
+    test('scientific notation with explicit sign', () {
+      final tokens = DbcTokenizer('1.5E+3 2.0e-1').tokenize();
+      expect(tokens[0].type, TokenType.float_);
+      expect(tokens[0].value, '1.5E+3');
+      expect(tokens[1].type, TokenType.float_);
+      expect(tokens[1].value, '2.0e-1');
+    });
+  });
 }
