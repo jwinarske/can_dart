@@ -54,3 +54,30 @@ target_link_libraries(can_engine PRIVATE
 install(TARGETS can_engine
   LIBRARY DESTINATION lib
 )
+
+# ── C++ unit tests (GoogleTest) ──────────────────────────────────────────────
+#
+# Off by default so hook/build.dart stays fast. CI enables it via:
+#   cmake -S . -B build-test -GNinja \
+#         -DCAN_ENGINE_BUILD_TESTING=ON [-DCAN_ENGINE_ENABLE_COVERAGE=ON]
+#   cmake --build build-test
+#   ctest --test-dir build-test --output-on-failure
+#
+# Patterned after https://github.com/jwinarske/pw_dart/tree/main/test/native
+
+option(CAN_ENGINE_BUILD_TESTING "Build can_engine C++ unit tests" OFF)
+option(CAN_ENGINE_ENABLE_COVERAGE "Instrument for gcov/lcov coverage" OFF)
+
+if(CAN_ENGINE_ENABLE_COVERAGE)
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        message(WARNING "Coverage only supported on GCC/Clang — ignoring")
+    else()
+        add_compile_options(-O0 -g --coverage)
+        add_link_options(--coverage)
+    endif()
+endif()
+
+if(CAN_ENGINE_BUILD_TESTING)
+    enable_testing()
+    add_subdirectory(test/native)
+endif()

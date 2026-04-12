@@ -217,7 +217,7 @@ final class LogStateNative extends Struct {
 /// This is THE interface between C++ and Dart. Dart reads fields
 /// via Pointer.ref — a direct memory dereference, no copy.
 ///
-/// Note: We cannot represent std::atomic<uint64_t> directly in Dart FFI.
+/// Note: We cannot represent `std::atomic<uint64_t>` directly in Dart FFI.
 /// We read the sequence counter via the engine_sequence() C API call instead.
 /// The remaining fields are accessed via pointer arithmetic on the snapshot.
 final class DisplaySnapshotNative extends Struct {
