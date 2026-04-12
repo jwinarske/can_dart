@@ -470,9 +470,10 @@ BO_ 100 TestMsg: 1 Vector_XXX
     });
 
     test('parses VAL_ and attaches value descriptions', () {
-      final gear = db.messageById(200)!.signals.firstWhere(
-        (s) => s.name == 'Gear',
-      );
+      final gear = db
+          .messageById(200)!
+          .signals
+          .firstWhere((s) => s.name == 'Gear');
       expect(gear.valueDescriptions, isNotNull);
       expect(gear.valueDescriptions![0], 'Park');
       expect(gear.valueDescriptions![3], 'Drive');
@@ -505,9 +506,10 @@ BO_ 100 TestMsg: 1 Vector_XXX
     });
 
     test('parses signed signal correctly', () {
-      final temp = db.messageById(100)!.signals.firstWhere(
-        (s) => s.name == 'Temp',
-      );
+      final temp = db
+          .messageById(100)!
+          .signals
+          .firstWhere((s) => s.name == 'Temp');
       expect(temp.valueType, ValueType.signed);
       expect(temp.offset, -40);
     });
@@ -519,21 +521,26 @@ BO_ 100 TestMsg: 1 Vector_XXX
         version: '1.0',
         nodes: [DbcNode(name: 'N1')],
         messages: [
-          DbcMessage(id: 100, name: 'M1', length: 8, signals: [
-            DbcSignal(
-              name: 'S1',
-              startBit: 0,
-              length: 8,
-              byteOrder: ByteOrder.littleEndian,
-              valueType: ValueType.unsigned,
-              factor: 1,
-              offset: 0,
-              minimum: 0,
-              maximum: 255,
-              unit: '',
-              receivers: [],
-            ),
-          ]),
+          DbcMessage(
+            id: 100,
+            name: 'M1',
+            length: 8,
+            signals: [
+              DbcSignal(
+                name: 'S1',
+                startBit: 0,
+                length: 8,
+                byteOrder: ByteOrder.littleEndian,
+                valueType: ValueType.unsigned,
+                factor: 1,
+                offset: 0,
+                minimum: 0,
+                maximum: 255,
+                unit: '',
+                receivers: [],
+              ),
+            ],
+          ),
         ],
       );
       expect(db.toString(), contains('version=1.0'));
@@ -609,8 +616,11 @@ BO_ 100 TestMsg: 1 Vector_XXX
       expect(
         () => DbcParser().parse('BO_ notanumber BadMsg: 8 Node'),
         throwsA(
-          isA<DbcParseException>().having((e) => e.message, 'message',
-              contains('Expected integer')),
+          isA<DbcParseException>().having(
+            (e) => e.message,
+            'message',
+            contains('Expected integer'),
+          ),
         ),
       );
     });

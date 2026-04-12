@@ -152,9 +152,7 @@ class Nmea2000Ecu {
   /// Send a PGN. Transport (single / FP / BAM) is selected automatically
   /// by the C++ layer based on the registered PGN transport type.
   Future<void> send(int pgn,
-      {required int priority,
-      required int dest,
-      required Uint8List data}) {
+      {required int priority, required int dest, required Uint8List data}) {
     return _ecu.send(pgn, priority: priority, dest: dest, data: data);
   }
 

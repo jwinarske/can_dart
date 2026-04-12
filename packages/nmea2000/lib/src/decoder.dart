@@ -34,7 +34,8 @@ Map<String, dynamic>? decode(Uint8List data, PgnDefinition def) {
 
     switch (field.type) {
       case FieldType.string:
-        result[field.name] = _extractString(data, field.bitOffset, field.bitLength);
+        result[field.name] =
+            _extractString(data, field.bitOffset, field.bitLength);
       case FieldType.lookup:
         result[field.name] = rawValue;
       case FieldType.float32 || FieldType.float64:

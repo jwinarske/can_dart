@@ -258,6 +258,6 @@ final Pointer<J1939Handle> Function(
             int, int, int, int)>('j1939_create_full');
 
 // Register a PGN transport type at runtime (0=single, 1=fast_packet, 2=iso_tp).
-final void Function(int, int) nmea2000SetPgnTransport = _lib.lookupFunction<
-    Void Function(Uint32, Uint8),
-    void Function(int, int)>('nmea2000_set_pgn_transport');
+final void Function(int, int) nmea2000SetPgnTransport =
+    _lib.lookupFunction<Void Function(Uint32, Uint8), void Function(int, int)>(
+        'nmea2000_set_pgn_transport');

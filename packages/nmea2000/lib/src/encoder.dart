@@ -65,8 +65,7 @@ void _writeBits(Uint8List data, int bitOffset, int bitLength, int value) {
 }
 
 /// Write a fixed-length ASCII string into the payload, padded with 0xFF.
-void _writeString(
-    Uint8List data, int bitOffset, int bitLength, String value) {
+void _writeString(Uint8List data, int bitOffset, int bitLength, String value) {
   final byteOffset = bitOffset >> 3;
   final byteLength = bitLength >> 3;
   final codeUnits = value.codeUnits;
