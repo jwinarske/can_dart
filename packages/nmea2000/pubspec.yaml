@@ -1,0 +1,22 @@
+name: nmea2000
+description: >
+  NMEA 2000 protocol layer on top of package:j1939.
+  Provides Fast Packet transport, Nmea2000Ecu with marine NAME defaults
+  (industry group 4, device class 120, device function 130), mandatory
+  PGN auto-responder (Product Info, Config Info, PGN List, Heartbeat),
+  PGN registry, and field-level decoder/encoder with NMEA 2000 NA/OOR
+  sentinel handling.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  j1939:
+    path: ../j1939
+  ffi: ^2.1.0
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.25.0

@@ -1,3 +1,6 @@
+// Copyright 2024 can_dart Contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // j1939.dart — high-level Dart API for the J1939 Linux stack
 
 import 'dart:async';
@@ -100,6 +103,94 @@ class J1939Ecu {
 
     ecu = J1939Ecu._(handle, port, controller.stream);
     return ecu;
+  }
+
+  // ── Extended factory (NMEA 2000) ────────────────────────────────────────────
+
+  /// Create an ECU with full NAME field control.
+  ///
+  /// Same as [create] but exposes [deviceFunction], [deviceClass],
+  /// [functionInstance], and [ecuInstance] for NMEA 2000 compliance.
+  static J1939Ecu createFull({
+    required String ifname,
+    required int address,
+    required int identityNumber,
+    int manufacturerCode = 0x7FF,
+    int industryGroup = 0,
+    int deviceFunction = 0,
+    int deviceClass = 0,
+    int functionInstance = 0,
+    int ecuInstance = 0,
+  }) {
+    _ensureApiInitialized();
+
+    final port = RawReceivePort();
+    final controller = StreamController<J1939Event>.broadcast();
+    late J1939Ecu ecu;
+
+    port.handler = (dynamic msg) {
+      if (msg is! List || msg.isEmpty) return;
+      switch (msg[0] as int) {
+        case 0:
+          controller.add(FrameReceived(
+            pgn: msg[1] as int,
+            source: msg[2] as int,
+            destination: msg[3] as int,
+            data: msg[4] as Uint8List,
+          ));
+        case 1:
+          controller.add(AddressClaimed(msg[1] as int));
+        case 2:
+          controller.add(const AddressClaimFailed());
+        case 3:
+          controller.add(EcuError(msg[1] as int));
+        case 4:
+          controller.add(Dm1Received(
+            source: msg[1] as int,
+            spn: msg[2] as int,
+            fmi: msg[3] as int,
+            occurrence: msg[4] as int,
+          ));
+        case 5:
+          ecu._completeSend(msg[1] as int, msg[2] as int);
+      }
+    };
+
+    final ifnameC = ifname.toNativeUtf8();
+    final handle = j1939CreateFull(
+      ifnameC,
+      address,
+      identityNumber,
+      manufacturerCode,
+      industryGroup,
+      deviceFunction,
+      deviceClass,
+      functionInstance,
+      ecuInstance,
+      port.sendPort.nativePort,
+    );
+    malloc.free(ifnameC);
+
+    if (handle == nullptr) {
+      port.close();
+      controller.close();
+      throw StateError(
+          'j1939_create_full failed on "$ifname": errno ${j1939LastError()}');
+    }
+
+    ecu = J1939Ecu._(handle, port, controller.stream);
+    return ecu;
+  }
+
+  // ── PGN transport registration ────────────────────────────────────────────
+
+  /// Register a PGN's transport type with the C++ layer.
+  ///
+  /// [transport]: 0=single, 1=fast_packet, 2=iso_tp.
+  /// Call before or after [create]/[createFull]; takes effect immediately.
+  static void setPgnTransport(int pgn, int transport) {
+    _ensureApiInitialized();
+    nmea2000SetPgnTransport(pgn, transport);
   }
 
   // ── Event streams ──────────────────────────────────────────────────────────

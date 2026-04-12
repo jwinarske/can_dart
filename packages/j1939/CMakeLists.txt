@@ -79,6 +79,8 @@ add_library(j1939_objects OBJECT
     src/j1939/Transport.cpp
     src/j1939/Network.cpp
     src/j1939/Ecu.cpp
+    src/j1939/FastPacket.cpp
+    src/j1939/PgnTransport.cpp
 )
 
 target_include_directories(j1939_objects PUBLIC src)

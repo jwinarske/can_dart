@@ -1,3 +1,6 @@
+// Copyright 2024 can_dart Contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // j1939_ffi.cpp — Dart FFI implementation layer
 //
 // Depends on:
@@ -35,6 +38,7 @@ using PostCObjectFn = int8_t (*)(int64_t port_id, Dart_CObject* message);
 static PostCObjectFn g_post_cobject = nullptr;
 
 #include "j1939/Ecu.hpp"
+#include "j1939/PgnTransport.hpp"
 
 #include <algorithm>
 #include <array>
@@ -399,6 +403,76 @@ void j1939_send_async(J1939Handle*   handle,
             const auto errno_val = ec ? static_cast<int32_t>(ec.value()) : 0;
             post_send_complete(port, send_id, errno_val);
         });
+}
+
+J1939Handle* j1939_create_full(const char* ifname,
+                                uint8_t     preferred_address,
+                                uint32_t    identity_number,
+                                uint16_t    manufacturer_code,
+                                uint8_t     industry_group,
+                                uint8_t     device_function,
+                                uint8_t     device_class,
+                                uint8_t     function_instance,
+                                uint8_t     ecu_instance,
+                                int64_t     event_port_id)
+{
+    const Name name{
+        .identity_number   = identity_number,
+        .manufacturer_code = manufacturer_code,
+        .function_instance = function_instance,
+        .ecu_instance      = ecu_instance,
+        .function          = device_function,
+        .vehicle_system    = device_class,
+        .arbitrary_address = true,
+        .industry_group    = industry_group,
+    };
+
+    auto result = Ecu::create(ifname, preferred_address, name);
+    if (!result) {
+        tl_last_error = result.error().value();
+        return nullptr;
+    }
+
+    auto* h       = new J1939Handle_{};
+    h->event_port = static_cast<Dart_Port>(event_port_id);
+    h->ecu        = std::move(*result);
+
+    const Dart_Port port = h->event_port;
+
+    // Same on_message and on_claim_result handlers as j1939_create.
+    h->ecu->on_message([port](const Frame& f) {
+        if (f.pgn == static_cast<uint32_t>(Pgn::Dm1) && f.data.size() >= 6U) {
+            const size_t fault_count = (f.data.size() - 2U) / 4U;
+            for (size_t i = 0U; i < fault_count; ++i) {
+                const size_t base = 2U + i * 4U;
+                const uint32_t spn =
+                      static_cast<uint32_t>(f.data[base])
+                    | (static_cast<uint32_t>(f.data[base + 1U]) <<  8U)
+                    | (static_cast<uint32_t>(f.data[base + 2U] & 0x07U) << 16U);
+                const uint8_t fmi        = f.data[base + 2U] & 0x1FU;
+                const uint8_t occurrence = f.data[base + 3U] & 0x7FU;
+                post_dm1(port, f.source, spn, fmi, occurrence);
+            }
+            return;
+        }
+        post_frame(port, f.pgn, f.source, f.destination,
+                   f.data.data(), f.data.size());
+    });
+
+    h->ecu->on_claim_result([port](std::optional<j1939::Address> addr) {
+        if (addr) {
+            post_address_claimed(port, *addr);
+        } else {
+            post_address_failed(port);
+        }
+    });
+
+    return h;
+}
+
+void nmea2000_set_pgn_transport(uint32_t pgn, uint8_t transport)
+{
+    j1939::set_pgn_transport(pgn, static_cast<j1939::PgnTransport>(transport));
 }
 
 } // extern "C"

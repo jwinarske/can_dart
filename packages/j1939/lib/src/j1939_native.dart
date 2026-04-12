@@ -1,3 +1,6 @@
+// Copyright 2024 can_dart Contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // j1939_native.dart — low-level dart:ffi bindings for j1939_ffi.h
 //
 // Nothing outside j1939.dart should call these directly.
@@ -242,3 +245,19 @@ final int Function(Pointer<J1939Handle>) j1939Address = _lib.lookupFunction<
 final bool Function(Pointer<J1939Handle>) j1939AddressClaimed =
     _lib.lookupFunction<Bool Function(Pointer<J1939Handle>),
         bool Function(Pointer<J1939Handle>)>('j1939_address_claimed');
+
+// ── NMEA 2000 extensions ────────────────────────────────────────────────────
+
+// Full NAME create — exposes all J1939 NAME fields for NMEA 2000.
+final Pointer<J1939Handle> Function(
+        Pointer<Utf8>, int, int, int, int, int, int, int, int, int)
+    j1939CreateFull = _lib.lookupFunction<
+        Pointer<J1939Handle> Function(Pointer<Utf8>, Uint8, Uint32, Uint16,
+            Uint8, Uint8, Uint8, Uint8, Uint8, Int64),
+        Pointer<J1939Handle> Function(Pointer<Utf8>, int, int, int, int, int,
+            int, int, int, int)>('j1939_create_full');
+
+// Register a PGN transport type at runtime (0=single, 1=fast_packet, 2=iso_tp).
+final void Function(int, int) nmea2000SetPgnTransport = _lib.lookupFunction<
+    Void Function(Uint32, Uint8),
+    void Function(int, int)>('nmea2000_set_pgn_transport');

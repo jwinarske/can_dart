@@ -1,3 +1,6 @@
+// Copyright 2024 can_dart Contributors
+// SPDX-License-Identifier: Apache-2.0
+
 /*
  * j1939_ffi.h — Dart/C++ boundary for the J1939 Linux stack
  *
@@ -153,6 +156,30 @@ J1939_FFI_EXPORT void j1939_send_async(
 
 J1939_FFI_EXPORT uint8_t j1939_address(J1939Handle* handle);
 J1939_FFI_EXPORT bool    j1939_address_claimed(J1939Handle* handle);
+
+// ── Extended lifecycle (NMEA 2000) ───────────────────────────────────────────
+
+// Create an ECU with full NAME field control.
+// Same as j1939_create but accepts all J1939 NAME fields needed for NMEA 2000.
+J1939_FFI_EXPORT J1939Handle* j1939_create_full(
+    const char* ifname,
+    uint8_t     preferred_address,
+    uint32_t    identity_number,
+    uint16_t    manufacturer_code,
+    uint8_t     industry_group,
+    uint8_t     device_function,
+    uint8_t     device_class,
+    uint8_t     function_instance,
+    uint8_t     ecu_instance,
+    int64_t     event_port_id
+);
+
+// ── NMEA 2000 Fast Packet ────────────────────────────────────────────────────
+
+// Register a PGN transport type at runtime.
+// transport: 0 = single, 1 = fast_packet, 2 = iso_tp.
+// Takes effect immediately for all ECU instances.
+J1939_FFI_EXPORT void nmea2000_set_pgn_transport(uint32_t pgn, uint8_t transport);
 
 #ifdef __cplusplus
 }

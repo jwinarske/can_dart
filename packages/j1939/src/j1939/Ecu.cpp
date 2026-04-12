@@ -1,3 +1,6 @@
+// Copyright 2024 can_dart Contributors
+// SPDX-License-Identifier: Apache-2.0
+
 #include <algorithm>
 #include <chrono>
 #include <future>
@@ -18,6 +21,8 @@
 #include "Network.hpp"
 #include "Transport.hpp"
 #include "can/Socket.hpp"
+#include "FastPacket.hpp"
+#include "PgnTransport.hpp"
 
 // ── print shim ────────────────────────────────────────────────────────────────
 #if __has_include(<print>)
@@ -64,6 +69,8 @@ struct Ecu::Impl {
     std::mutex               mutex;
     network::AddressClaimer  claimer;
     transport::Receiver      transport_rx;
+    fast_packet::Receiver    fp_rx;
+    fast_packet::Sender      fp_tx;
     std::vector<Dm1Fault>    dm1_faults;
     MessageHandler           message_handler;
     ClaimHandler             claim_result_handler;  // fires once on claim settle
@@ -96,6 +103,8 @@ struct Ecu::Impl {
         , claimer{socket, preferred, name}
         , transport_rx{socket, preferred,
             [this](const Frame& frame) { on_assembled_frame(frame); }}
+        , fp_rx{[this](const Frame& frame) { on_assembled_frame(frame); }}
+        , fp_tx{socket}
     {}
 
     // ── Internal helpers ──────────────────────────────────────────────────
@@ -232,6 +241,17 @@ void Ecu::Impl::rx_loop(const std::stop_token& stop)
                     dm1_response_dest = id.sa;          // deferred outside lock
                 }
             }
+            // Always deliver Request frames to user handler so Dart can
+            // implement protocol-level auto-responders (NMEA 2000).
+            user_frame = Frame{
+                .pgn         = frame_pgn,
+                .source      = id.sa,
+                .destination = id.is_broadcast() ? kBroadcast : id.ps,
+                .data        = {raw->data.begin(), raw->data.begin() + raw->dlc},
+            };
+        } else if (pgn_transport(frame_pgn) == PgnTransport::fast_packet) {
+            // Fast Packet reassembly — fp_rx fires on_assembled_frame when complete.
+            fp_rx.on_frame(id, {raw->data.data(), raw->dlc});
         } else {
             user_frame = Frame{
                 .pgn         = frame_pgn,
@@ -383,6 +403,16 @@ Ecu::send(Pgn pgn, Priority priority, Address dest,
         return {};
     }
 
+    // Fast Packet: use FP framing when the PGN is registered as fast_packet.
+    if (pgn_transport(pgn_raw) == PgnTransport::fast_packet) {
+        Address own_addr;
+        {
+            const std::scoped_lock lock{impl_->mutex};
+            own_addr = impl_->own_address;
+        }
+        return impl_->fp_tx.send(pgn_raw, priority, dest, own_addr, data);
+    }
+
     // Multi-frame: capture own_address and release the lock before the blocking
     // send path.  Holding the mutex across BAM's sleep_for() calls starved the
     // RX jthread for the entire transmission window.
@@ -460,6 +490,15 @@ void Ecu::send_async(Pgn pgn, Priority priority, Address dest,
                             std::span<const uint8_t>{data.data(), data.size()});
         on_complete(r ? std::error_code{}
                       : std::make_error_code(std::errc::io_error));
+        return;
+    }
+
+    // Fast Packet: no inter-packet delay, so run synchronously and call on_complete.
+    if (pgn_transport(static_cast<uint32_t>(pgn)) == PgnTransport::fast_packet) {
+        auto result = send(pgn, priority, dest,
+                           std::span<const uint8_t>{data.data(), data.size()});
+        on_complete(result ? std::error_code{}
+                          : std::make_error_code(std::errc::io_error));
         return;
     }
 
