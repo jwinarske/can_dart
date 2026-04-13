@@ -14,7 +14,7 @@ import 'dart:typed_data';
 
 import 'package:j1939/j1939.dart';
 
-import 'encoder.dart';
+import 'package:can_codec/can_codec.dart';
 import 'group_function.dart';
 import 'group_function_codec.dart';
 import 'nmea2000_registry.dart';

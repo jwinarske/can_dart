@@ -12,6 +12,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:can_codec/can_codec.dart' as codec;
 import 'package:nmea2000/nmea2000.dart';
 import 'package:nmea2000_bus/nmea2000_bus.dart';
 
@@ -139,7 +140,7 @@ class N2kService extends ChangeNotifier {
     final def = registry.lookup(frame.pgn);
     if (def == null) return;
 
-    final decoded = decode(frame.data, def);
+    final decoded = codec.decode(frame.data, def);
     if (decoded == null) return;
 
     var changed = false;

@@ -13,15 +13,13 @@
 //   • PgnTransport — Dart mirror of the C++ transport enum.
 //   • Mandatory PGN definitions — const definitions for the core set.
 
-export 'src/decoder.dart';
-export 'src/encoder.dart';
+// Re-export codec types (now in can_codec) for backward compatibility.
+export 'package:can_codec/can_codec.dart';
+
 export 'src/group_function.dart';
 export 'src/group_function_codec.dart';
 export 'src/nmea2000_ecu.dart';
 export 'src/nmea2000_registry.dart';
-export 'src/pgn_definition.dart';
-export 'src/pgn_transport.dart';
-export 'src/sentinels.dart';
 export 'src/pgns/mandatory.dart';
 export 'src/pgns/navigation.dart';
 export 'src/pgns/wind.dart';

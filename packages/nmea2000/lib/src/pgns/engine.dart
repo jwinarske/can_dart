@@ -1,7 +1,7 @@
 // Copyright 2026 Joel Winarske
 // SPDX-License-Identifier: Apache-2.0
 
-import '../pgn_definition.dart';
+import 'package:can_codec/can_codec.dart';
 
 /// Engine and transmission NMEA 2000 PGN definitions.
 

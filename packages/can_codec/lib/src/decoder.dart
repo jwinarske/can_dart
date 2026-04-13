@@ -3,17 +3,17 @@
 
 import 'dart:typed_data';
 
-import 'pgn_definition.dart';
+import 'message_definition.dart';
 import 'sentinels.dart';
 
-/// Decode a raw NMEA 2000 payload into named field values.
+/// Decode a raw CAN payload into named field values.
 ///
 /// Returns a map of field name → physical value. Fields whose raw value
 /// matches the NA sentinel are omitted. Fields matching OOR are set to
 /// [double.nan].
 ///
 /// The payload bytes are little-endian per the NMEA 2000 / J1939 convention.
-Map<String, dynamic>? decode(Uint8List data, PgnDefinition def) {
+Map<String, dynamic>? decode(Uint8List data, MessageDefinition def) {
   if (data.length < def.dataLength && !def.repeating) return null;
 
   final result = <String, dynamic>{};

@@ -382,7 +382,9 @@ J1939Handle* j1939_create_full(const char* ifname, uint8_t preferred_address,
                                uint16_t manufacturer_code,
                                uint8_t industry_group, uint8_t device_function,
                                uint8_t device_class, uint8_t function_instance,
-                               uint8_t ecu_instance, int64_t event_port_id) {
+                               uint8_t ecu_instance,
+                               uint8_t vehicle_system_instance,
+                               int64_t event_port_id) {
     const Name name {
         .identity_number = identity_number,
         .manufacturer_code = manufacturer_code,
@@ -392,6 +394,7 @@ J1939Handle* j1939_create_full(const char* ifname, uint8_t preferred_address,
         .vehicle_system = device_class,
         .arbitrary_address = true,
         .industry_group = industry_group,
+        .vehicle_system_instance = vehicle_system_instance,
     };
 
     auto result = Ecu::create(ifname, preferred_address, name);

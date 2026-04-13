@@ -3,11 +3,11 @@
 
 /// Mirrors the C++ `j1939::PgnTransport` enum.
 /// Integer values 0/1/2 match the C++ side for FFI calls.
-enum PgnTransport {
+enum TransportType {
   single(0),
   fastPacket(1),
   isoTp(2);
 
-  const PgnTransport(this.value);
+  const TransportType(this.value);
   final int value;
 }

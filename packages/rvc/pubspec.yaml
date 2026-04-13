@@ -1,0 +1,20 @@
+name: rvc
+description: >-
+  RV-C (Recreation Vehicle CAN) protocol layer on top of package:j1939.
+  DGN definitions, command/status helpers, and RvcEcu with RV-C NAME
+  defaults. Based on the freely available RVIA RV-C specification.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  j1939:
+    path: ../j1939
+  can_codec:
+    path: ../can_codec
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.25.0

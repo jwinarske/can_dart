@@ -1,9 +1,10 @@
 // Copyright 2026 Joel Winarske
 // SPDX-License-Identifier: Apache-2.0
 
-/// NMEA 2000 data-not-available / out-of-range sentinel helpers.
+/// CAN data-not-available / out-of-range sentinel helpers.
 ///
-/// Per the NMEA 2000 convention, reserved bit patterns for each field width:
+/// Per the NMEA 2000 / J1939 / RV-C convention, reserved bit patterns for
+/// each field width:
 ///   - NA (data not available): all bits set
 ///   - OOR (out of range): all bits set minus 1
 ///   - Reserved: all bits set minus 2

@@ -1,7 +1,7 @@
 // Copyright 2026 Joel Winarske
 // SPDX-License-Identifier: Apache-2.0
 
-import 'package:nmea2000/src/pgn_definition.dart';
+import 'package:can_codec/can_codec.dart';
 import 'package:test/test.dart';
 
 void main() {

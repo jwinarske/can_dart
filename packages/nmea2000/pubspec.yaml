@@ -16,6 +16,7 @@ environment:
 
 dependencies:
   j1939: ^0.1.0
+  can_codec: ^0.1.0
   ffi: ^2.1.0
 
 executables:

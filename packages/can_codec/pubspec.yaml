@@ -1,0 +1,14 @@
+name: can_codec
+description: >-
+  Protocol-agnostic CAN bus message codec. Defines message/field schemas
+  and provides bit-level decoder/encoder with NMEA 2000 / RV-C / J1939
+  sentinel handling. Shared by nmea2000 and rvc packages.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.25.0

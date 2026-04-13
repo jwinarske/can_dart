@@ -152,7 +152,8 @@ j1939_create_full(const char* ifname, uint8_t preferred_address,
                   uint32_t identity_number, uint16_t manufacturer_code,
                   uint8_t industry_group, uint8_t device_function,
                   uint8_t device_class, uint8_t function_instance,
-                  uint8_t ecu_instance, int64_t event_port_id);
+                  uint8_t ecu_instance, uint8_t vehicle_system_instance,
+                  int64_t event_port_id);
 
 // ── NMEA 2000 Fast Packet ────────────────────────────────────────────────────
 

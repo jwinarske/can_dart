@@ -3,14 +3,14 @@
 
 import 'dart:typed_data';
 
-import 'pgn_definition.dart';
+import 'message_definition.dart';
 import 'sentinels.dart';
 
-/// Encode named field values into an NMEA 2000 payload.
+/// Encode named field values into a CAN payload.
 ///
 /// Fields not present in [values] are filled with their NA sentinel.
 /// Returns a [Uint8List] of [def.dataLength] bytes, little-endian.
-Uint8List encode(Map<String, dynamic> values, PgnDefinition def) {
+Uint8List encode(Map<String, dynamic> values, MessageDefinition def) {
   final data = Uint8List(def.dataLength);
   // Initialize to all 0xFF (NA for all field widths).
   data.fillRange(0, data.length, 0xFF);
