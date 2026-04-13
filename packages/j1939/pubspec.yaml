@@ -18,7 +18,7 @@ topics:
 #   • Record destructuring: (claimA, claimB) = await (...).wait
 #   • (Future<A>, Future<B>).wait extension
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.6.0 <4.0.0"
 
 # `dart run j1939`            invokes bin/j1939.dart     — 2-ECU demo.
 # `dart run j1939:load_node`  invokes bin/load_node.dart — stack load-test node.

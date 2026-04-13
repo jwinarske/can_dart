@@ -12,7 +12,7 @@ topics:
   - marine
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.6.0 <4.0.0"
 
 dependencies:
   nmea2000: ^0.1.0
