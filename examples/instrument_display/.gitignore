@@ -1,4 +1,7 @@
 .dart_tool/
 .desktop-homescreen/
+.idea/
+.metadata
+*.iml
 build/
 linux/
