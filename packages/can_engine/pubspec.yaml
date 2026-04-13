@@ -3,7 +3,13 @@ description: >-
   Zero-copy CAN engine with C++ Asio event loop and Glaze reflection.
   Dart reads the DisplaySnapshot via Pointer.ref — no copies, no GC.
 version: 0.1.0
-publish_to: none
+repository: https://github.com/jwinarske/can_dart/tree/main/packages/can_engine
+homepage: https://github.com/jwinarske/can_dart
+issue_tracker: https://github.com/jwinarske/can_dart/issues
+topics:
+  - can-bus
+  - socketcan
+  - ffi
 
 environment:
   sdk: ^3.7.0
@@ -12,8 +18,7 @@ dependencies:
   ffi: ^2.1.4
   hooks: ^1.0.0
   code_assets: ^1.0.0
-  can_dbc:
-    path: ../can_dbc
+  can_dbc: ^0.1.0
 
 dev_dependencies:
   test: ^1.25.8
