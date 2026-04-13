@@ -274,18 +274,42 @@ class WindScreen extends StatelessWidget {
   }
 
   static _BeaufortEntry _beaufort(double kts) {
-    if (kts < 1) { return _BeaufortEntry(0, 'Calm', MaritimePalette.lampGreen); }
-    if (kts <= 3) { return _BeaufortEntry(1, 'Light air', MaritimePalette.lampGreen); }
-    if (kts <= 6) { return _BeaufortEntry(2, 'Light breeze', MaritimePalette.lampGreen); }
-    if (kts <= 10) { return _BeaufortEntry(3, 'Gentle breeze', MaritimePalette.lampGreen); }
-    if (kts <= 16) { return _BeaufortEntry(4, 'Moderate breeze', MaritimePalette.lampGreen); }
-    if (kts <= 21) { return _BeaufortEntry(5, 'Fresh breeze', MaritimePalette.lampAmber); }
-    if (kts <= 27) { return _BeaufortEntry(6, 'Strong breeze', MaritimePalette.lampAmber); }
-    if (kts <= 33) { return _BeaufortEntry(7, 'Near gale', MaritimePalette.lampAmber); }
-    if (kts <= 40) { return _BeaufortEntry(8, 'Gale', MaritimePalette.lampRed); }
-    if (kts <= 47) { return _BeaufortEntry(9, 'Strong gale', MaritimePalette.lampRed); }
-    if (kts <= 55) { return _BeaufortEntry(10, 'Storm', MaritimePalette.lampRed); }
-    if (kts <= 63) { return _BeaufortEntry(11, 'Violent storm', MaritimePalette.lampRed); }
+    if (kts < 1) {
+      return _BeaufortEntry(0, 'Calm', MaritimePalette.lampGreen);
+    }
+    if (kts <= 3) {
+      return _BeaufortEntry(1, 'Light air', MaritimePalette.lampGreen);
+    }
+    if (kts <= 6) {
+      return _BeaufortEntry(2, 'Light breeze', MaritimePalette.lampGreen);
+    }
+    if (kts <= 10) {
+      return _BeaufortEntry(3, 'Gentle breeze', MaritimePalette.lampGreen);
+    }
+    if (kts <= 16) {
+      return _BeaufortEntry(4, 'Moderate breeze', MaritimePalette.lampGreen);
+    }
+    if (kts <= 21) {
+      return _BeaufortEntry(5, 'Fresh breeze', MaritimePalette.lampAmber);
+    }
+    if (kts <= 27) {
+      return _BeaufortEntry(6, 'Strong breeze', MaritimePalette.lampAmber);
+    }
+    if (kts <= 33) {
+      return _BeaufortEntry(7, 'Near gale', MaritimePalette.lampAmber);
+    }
+    if (kts <= 40) {
+      return _BeaufortEntry(8, 'Gale', MaritimePalette.lampRed);
+    }
+    if (kts <= 47) {
+      return _BeaufortEntry(9, 'Strong gale', MaritimePalette.lampRed);
+    }
+    if (kts <= 55) {
+      return _BeaufortEntry(10, 'Storm', MaritimePalette.lampRed);
+    }
+    if (kts <= 63) {
+      return _BeaufortEntry(11, 'Violent storm', MaritimePalette.lampRed);
+    }
     return _BeaufortEntry(12, 'Hurricane', MaritimePalette.lampRed);
   }
 }
