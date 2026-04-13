@@ -1,3 +1,10 @@
+## 0.1.1
+
+- Add comprehensive test suite: decoder, encoder, sentinels, PGN definitions,
+  registry, Group Function types and codec, and vcan0 integration tests.
+- Add README, CHANGELOG, LICENSE, and example for pub.dev.
+- Add repository, homepage, and topic metadata to pubspec.
+
 ## 0.1.0
 
 - Initial release.

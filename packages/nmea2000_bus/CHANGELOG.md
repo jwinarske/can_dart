@@ -1,3 +1,10 @@
+## 0.1.1
+
+- Add test suite: N2kName 64-bit encoding/decoding with bit-position
+  verification, ProductInfo decoding, and sealed BusEvent hierarchy tests.
+- Add README, CHANGELOG, LICENSE, and example for pub.dev.
+- Add repository, homepage, and topic metadata to pubspec.
+
 ## 0.1.0
 
 - Initial release.

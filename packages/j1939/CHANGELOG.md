@@ -1,3 +1,10 @@
+## 0.1.1
+
+- Fix DM1 SPN decode bit-shift in FFI layer (was reading wrong 3 bits).
+- Add `.clang-format` config for consistent C++ formatting across toolchain versions.
+- Add `scripts/clang-format-check.sh` for local pre-commit checking.
+- Add library-level and public API doc comments.
+
 ## 0.1.0
 
 - Initial release.

@@ -1,3 +1,9 @@
+## 0.1.1
+
+- Add README, CHANGELOG, LICENSE, and example for pub.dev.
+- Add repository, homepage, and topic metadata to pubspec.
+- Apply clang-format to all C++ sources.
+
 ## 0.1.0
 
 - Initial release.
