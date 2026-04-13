@@ -15,7 +15,8 @@ environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
-  nmea2000: ^0.1.0
+  nmea2000:
+    path: ../nmea2000
 
 dev_dependencies:
   lints: ^6.1.0
