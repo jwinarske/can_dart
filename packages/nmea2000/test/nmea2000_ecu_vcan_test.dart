@@ -176,24 +176,21 @@ void main() {
     });
 
     test('heartbeat is sent on create', () async {
-      // Create a listener first so we catch the heartbeat.
-      final listener = J1939Ecu.create(
+      // Use an Nmea2000Ecu as the listener so fast_packet PGNs (including
+      // Heartbeat 126993) are registered with the C++ transport layer.
+      final listener = await Nmea2000Ecu.create(
         ifname: _vcan,
         address: 0x93,
         identityNumber: 0xB004,
+        // Long heartbeat period so it doesn't interfere.
+        heartbeatPeriod: const Duration(seconds: 600),
       );
       addTearDown(listener.dispose);
 
-      await listener.events
-          .where((e) => e is AddressClaimed)
-          .first
-          .timeout(const Duration(milliseconds: 400));
-
-      // Set up heartbeat listener before creating the N2K ECU.
-      final heartbeatFuture = listener.frames
-          .where((f) => f.pgn == 126993)
-          .first
-          .timeout(const Duration(seconds: 5));
+      // Listen for Heartbeat (PGN 126993) before creating the display ECU.
+      final heartbeatFuture = listener.framesForPgn(126993).first.timeout(
+            const Duration(seconds: 5),
+          );
 
       final display = await Nmea2000Ecu.create(
         ifname: _vcan,
