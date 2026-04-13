@@ -15,6 +15,8 @@
 
 export 'src/decoder.dart';
 export 'src/encoder.dart';
+export 'src/group_function.dart';
+export 'src/group_function_codec.dart';
 export 'src/nmea2000_ecu.dart';
 export 'src/nmea2000_registry.dart';
 export 'src/pgn_definition.dart';

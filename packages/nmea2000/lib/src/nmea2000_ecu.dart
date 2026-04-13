@@ -15,6 +15,8 @@ import 'dart:typed_data';
 import 'package:j1939/j1939.dart';
 
 import 'encoder.dart';
+import 'group_function.dart';
+import 'group_function_codec.dart';
 import 'nmea2000_registry.dart';
 import 'pgns/mandatory.dart';
 
@@ -57,8 +59,19 @@ class Nmea2000Ecu {
 
   Timer? _heartbeatTimer;
   StreamSubscription<FrameReceived>? _requestSub;
+  StreamSubscription<FrameReceived>? _groupFunctionSub;
   int _heartbeatSeq = 0;
+  int _uniqueId = 0;
   bool _disposed = false;
+
+  // Group Function client: pending request → completer map.
+  // Key: "$targetPgn:$replyFunctionCode:$sourceSa" or "$targetPgn:$replyFunctionCode"
+  final _pendingGf = <String, Completer<Uint8List>>{};
+
+  // Group Function server: per-function-code handlers.
+  GroupFunctionHandler? _readFieldsHandler;
+  GroupFunctionHandler? _writeFieldsHandler;
+  GroupFunctionHandler? _commandHandler;
 
   // ── Factory ────────────────────────────────────────────────────────────────
 
@@ -126,6 +139,7 @@ class Nmea2000Ecu {
 
     n2k._startHeartbeat(heartbeatPeriod);
     n2k._startAutoResponder();
+    n2k._startGroupFunctionListener();
     return n2k;
   }
 
@@ -269,6 +283,191 @@ class Nmea2000Ecu {
     } catch (_) {}
   }
 
+  // ── Group Function client ───────────────────────────────────────────────────
+
+  /// Send a Command (function 1) to [targetSa] and wait for Acknowledge.
+  ///
+  /// [fields] are field-number/value pairs for the target PGN.
+  /// Returns the parsed Acknowledge. Throws [TimeoutException] if no reply.
+  Future<GroupFunctionAck> command({
+    required int targetSa,
+    required int pgn,
+    required List<FieldPair> fields,
+    Duration timeout = const Duration(seconds: 2),
+  }) async {
+    final payload = encodeCommand(pgn: pgn, fields: fields);
+    final key = '$pgn:${GroupFunctionCode.acknowledge.value}:$targetSa';
+    final completer = Completer<Uint8List>();
+    _pendingGf[key] = completer;
+
+    try {
+      await _ecu.send(kGroupFunctionPgn,
+          priority: 3, dest: targetSa, data: payload);
+      final reply = await completer.future.timeout(timeout);
+      return decodeAcknowledge(reply) ??
+          GroupFunctionAck(pgn: pgn, pgnError: PgnErrorCode.pgnNotSupported);
+    } on TimeoutException {
+      _pendingGf.remove(key);
+      rethrow;
+    }
+  }
+
+  /// Send a Read Fields (function 3) request and wait for Read Fields Reply.
+  ///
+  /// [fieldNumbers] are 1-based field indices within the target PGN.
+  Future<ReadFieldsReply> readFields({
+    required int targetSa,
+    required int pgn,
+    required List<int> fieldNumbers,
+    Duration timeout = const Duration(seconds: 2),
+  }) async {
+    final uid = (_uniqueId++) & 0xFF;
+    final payload = encodeReadFields(
+        pgn: pgn, uniqueId: uid, requestedFieldNumbers: fieldNumbers);
+    final key = '$pgn:${GroupFunctionCode.readFieldsReply.value}:$targetSa';
+    final completer = Completer<Uint8List>();
+    _pendingGf[key] = completer;
+
+    try {
+      await _ecu.send(kGroupFunctionPgn,
+          priority: 3, dest: targetSa, data: payload);
+      final reply = await completer.future.timeout(timeout);
+      return decodeReadFieldsReply(reply) ??
+          ReadFieldsReply(pgn: pgn, fields: []);
+    } on TimeoutException {
+      _pendingGf.remove(key);
+      rethrow;
+    }
+  }
+
+  /// Send a Write Fields (function 5) request and wait for Write Fields Reply.
+  ///
+  /// [fields] are field-number/value pairs to write.
+  Future<WriteFieldsReply> writeFields({
+    required int targetSa,
+    required int pgn,
+    required List<FieldPair> fields,
+    Duration timeout = const Duration(seconds: 2),
+  }) async {
+    final uid = (_uniqueId++) & 0xFF;
+    final payload = encodeWriteFields(pgn: pgn, uniqueId: uid, fields: fields);
+    final key = '$pgn:${GroupFunctionCode.writeFieldsReply.value}:$targetSa';
+    final completer = Completer<Uint8List>();
+    _pendingGf[key] = completer;
+
+    try {
+      await _ecu.send(kGroupFunctionPgn,
+          priority: 3, dest: targetSa, data: payload);
+      final reply = await completer.future.timeout(timeout);
+      return decodeWriteFieldsReply(reply) ??
+          WriteFieldsReply(pgn: pgn, fields: []);
+    } on TimeoutException {
+      _pendingGf.remove(key);
+      rethrow;
+    }
+  }
+
+  // ── Group Function server ─────────────────────────────────────────────────
+
+  /// Register a handler for incoming Read Fields (function 3) requests.
+  ///
+  /// The handler receives a [GroupFunctionRequest] and should call
+  /// [GroupFunctionRequest.replyWithFields] or [GroupFunctionRequest.reject].
+  set onReadFields(GroupFunctionHandler? handler) =>
+      _readFieldsHandler = handler;
+
+  /// Register a handler for incoming Write Fields (function 5) requests.
+  set onWriteFields(GroupFunctionHandler? handler) =>
+      _writeFieldsHandler = handler;
+
+  /// Register a handler for incoming Command (function 1) requests.
+  set onCommand(GroupFunctionHandler? handler) => _commandHandler = handler;
+
+  // ── Group Function listener ───────────────────────────────────────────────
+
+  void _startGroupFunctionListener() {
+    _groupFunctionSub =
+        _ecu.framesForPgn(kGroupFunctionPgn).listen(_onGroupFunction);
+  }
+
+  void _onGroupFunction(FrameReceived frame) {
+    if (frame.data.isEmpty) return;
+    final code = decodeFunctionCode(frame.data);
+    if (code == null) return;
+    final targetPgn = decodeTargetPgn(frame.data);
+
+    switch (code) {
+      // Replies to our client requests.
+      case GroupFunctionCode.acknowledge:
+        _completePending(
+            '$targetPgn:${code.value}:${frame.source}', frame.data);
+      case GroupFunctionCode.readFieldsReply:
+        _completePending(
+            '$targetPgn:${code.value}:${frame.source}', frame.data);
+      case GroupFunctionCode.writeFieldsReply:
+        _completePending(
+            '$targetPgn:${code.value}:${frame.source}', frame.data);
+
+      // Incoming requests to our server.
+      case GroupFunctionCode.command:
+        _dispatchServerRequest(code, targetPgn, frame);
+      case GroupFunctionCode.readFields:
+        _dispatchServerRequest(code, targetPgn, frame);
+      case GroupFunctionCode.writeFields:
+        _dispatchServerRequest(code, targetPgn, frame);
+
+      // Request (function 0) is handled differently — it's a transmission
+      // rate change request, not a field-level operation. Ignored for now.
+      case GroupFunctionCode.request:
+        break;
+    }
+  }
+
+  void _completePending(String key, Uint8List data) {
+    final completer = _pendingGf.remove(key);
+    if (completer != null && !completer.isCompleted) {
+      completer.complete(Uint8List.fromList(data));
+    }
+  }
+
+  void _dispatchServerRequest(
+      GroupFunctionCode code, int targetPgn, FrameReceived frame) {
+    final fields = decodeIncomingFieldPairs(frame.data);
+    final request = GroupFunctionRequest(
+      functionCode: code,
+      pgn: targetPgn,
+      requesterSa: frame.source,
+      fields: fields,
+      sendReply: (replyCode, pgn, payload) {
+        try {
+          _ecu.send(kGroupFunctionPgn,
+              priority: 3,
+              dest: frame.source,
+              data: Uint8List.fromList(payload));
+        } catch (_) {}
+      },
+    );
+
+    GroupFunctionHandler? handler;
+    switch (code) {
+      case GroupFunctionCode.command:
+        handler = _commandHandler;
+      case GroupFunctionCode.readFields:
+        handler = _readFieldsHandler;
+      case GroupFunctionCode.writeFields:
+        handler = _writeFieldsHandler;
+      default:
+        break;
+    }
+
+    if (handler != null) {
+      handler(request);
+    } else {
+      // Default: reject with PGN not supported.
+      request.reject(PgnErrorCode.pgnNotSupported);
+    }
+  }
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   void dispose() {
@@ -276,6 +475,14 @@ class Nmea2000Ecu {
     _disposed = true;
     _heartbeatTimer?.cancel();
     _requestSub?.cancel();
+    _groupFunctionSub?.cancel();
+    // Complete any pending client requests with errors.
+    for (final completer in _pendingGf.values) {
+      if (!completer.isCompleted) {
+        completer.completeError(StateError('Nmea2000Ecu disposed'));
+      }
+    }
+    _pendingGf.clear();
     _ecu.dispose();
   }
 }

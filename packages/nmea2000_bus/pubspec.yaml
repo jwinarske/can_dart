@@ -1,9 +1,7 @@
 name: nmea2000_bus
-description: >
-  NMEA 2000 bus topology tracker and device registry.
-  Attaches to an Nmea2000Ecu event stream, auto-discovers devices via
-  AddressClaimed frames and ISO Requests for Product Information and
-  PGN List, and exposes a reactive Stream<BusEvent> for Flutter binding.
+description: >-
+  NMEA 2000 bus topology tracker and device registry. Auto-discovers
+  devices, tracks online/offline state, and exposes reactive bus events.
 version: 0.1.0
 publish_to: none
 
