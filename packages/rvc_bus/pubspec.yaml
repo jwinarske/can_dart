@@ -1,0 +1,18 @@
+name: rvc_bus
+description: >-
+  RV-C bus topology tracker and device registry. Auto-discovers RV-C
+  devices, maps device function codes to human-readable names, tracks
+  online/offline state, and exposes reactive bus events.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  rvc:
+    path: ../rvc
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.25.0
