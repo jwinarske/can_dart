@@ -28,10 +28,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1
+      - name: Create pubspec overrides for monorepo deps
+        run: ./scripts/create-pubspec-overrides.sh
       - name: dart format
         run: |
           set -e
-          for pkg in packages/can_socket packages/can_dbc packages/can_engine packages/j1939; do
+          for pkg in packages/can_socket packages/can_dbc packages/can_engine packages/j1939 packages/nmea2000 packages/nmea2000_bus; do
             echo "::group::dart format $pkg"
             (cd "$pkg" && dart pub get --offline 2>/dev/null || dart pub get)
             (cd "$pkg" && dart format --output=none --set-exit-if-changed .)
@@ -43,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [can_socket, can_dbc, can_engine, j1939]
+        package: [can_socket, can_dbc, can_engine, j1939, nmea2000, nmea2000_bus]
     defaults:
       run:
         working-directory: packages/${{ matrix.package }}
@@ -59,6 +61,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build build-essential
+
+      - name: Create pubspec overrides for monorepo deps
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          ./scripts/create-pubspec-overrides.sh
+
       - run: dart pub get
       - run: dart analyze --fatal-infos
 
@@ -67,7 +75,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [can_socket, can_dbc, can_engine, j1939]
+        package: [can_socket, can_dbc, can_engine, j1939, nmea2000, nmea2000_bus]
     defaults:
       run:
         working-directory: packages/${{ matrix.package }}
@@ -91,6 +99,11 @@ jobs:
           sudo ip link add dev vcan0 type vcan || true
           sudo ip link set up vcan0
           ip -details -brief link show vcan0
+
+      - name: Create pubspec overrides for monorepo deps
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          ./scripts/create-pubspec-overrides.sh
 
       - run: dart pub get
 
@@ -210,3 +223,32 @@ jobs:
         run: |
           find packages/j1939/src packages/j1939/ffi -type f \( -name '*.cpp' -o -name '*.hpp' \) -print0 \
             | xargs -0 --no-run-if-empty clang-tidy -p packages/j1939/build --extra-arg=-std=c++23 || true
+
+  flutter-examples:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [obdii_monitor, throttle_ui, instrument_display]
+    defaults:
+      run:
+        working-directory: examples/${{ matrix.example }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install native build toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build build-essential
+
+      - name: Create pubspec overrides for monorepo deps
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          ./scripts/create-pubspec-overrides.sh
+
+      - run: flutter pub get
+      - run: flutter analyze --fatal-infos
+      - run: flutter test
