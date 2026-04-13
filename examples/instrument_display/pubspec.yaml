@@ -1,0 +1,26 @@
+name: instrument_display
+description: >-
+  NMEA 2000 multi-function instrument display. Connects to a CAN bus via
+  nmea2000, decodes sensor data, and renders gauges and readouts on
+  multiple pages. Run marine_sim on vcan0 for synthetic test data.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  nmea2000:
+    path: ../../packages/nmea2000
+  nmea2000_bus:
+    path: ../../packages/nmea2000_bus
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
