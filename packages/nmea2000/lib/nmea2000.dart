@@ -21,6 +21,14 @@ export 'src/pgn_definition.dart';
 export 'src/pgn_transport.dart';
 export 'src/sentinels.dart';
 export 'src/pgns/mandatory.dart';
+export 'src/pgns/navigation.dart';
+export 'src/pgns/wind.dart';
+export 'src/pgns/depth_speed.dart';
+export 'src/pgns/heading.dart';
+export 'src/pgns/rudder.dart';
+export 'src/pgns/engine.dart';
+export 'src/pgns/electrical.dart';
+export 'src/pgns/set_drift.dart';
 
 // Re-export j1939 types consumers will need.
 export 'package:j1939/j1939.dart'

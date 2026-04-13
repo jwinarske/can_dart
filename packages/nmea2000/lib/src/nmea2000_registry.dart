@@ -2,7 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'pgn_definition.dart';
+import 'pgns/depth_speed.dart';
+import 'pgns/electrical.dart';
+import 'pgns/engine.dart';
+import 'pgns/heading.dart';
 import 'pgns/mandatory.dart';
+import 'pgns/navigation.dart';
+import 'pgns/rudder.dart';
+import 'pgns/set_drift.dart';
+import 'pgns/wind.dart';
 
 /// Registry of known PGN definitions.
 ///
@@ -18,11 +26,20 @@ class Nmea2000Registry {
 
   final Map<int, PgnDefinition> _pgns = {};
 
-  /// Create a registry pre-loaded with the mandatory NMEA 2000 PGNs
-  /// (Heartbeat, Product Info, Config Info, ISO Ack, ISO Request).
+  /// Create a registry pre-loaded with the mandatory NMEA 2000 PGNs and
+  /// the standard instrument display PGN set (~30 PGNs covering navigation,
+  /// wind, depth, heading, engine, electrical, rudder, set & drift).
   factory Nmea2000Registry.standard() {
     final r = Nmea2000Registry._();
     r.register(mandatoryPgns);
+    r.register(navigationPgns);
+    r.register(windPgns);
+    r.register(depthSpeedPgns);
+    r.register(headingPgns);
+    r.register(rudderPgns);
+    r.register(enginePgns);
+    r.register(electricalPgns);
+    r.register(setDriftPgns);
     return r;
   }
 
