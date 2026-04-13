@@ -1,10 +1,17 @@
 name: j1939
-description: >
-  Dart FFI bindings for the j1939 Linux SocketCAN stack.
-  Provides async J1939 frame TX/RX, address claiming, DM1 diagnostics,
-  and zero-copy frame delivery via Dart_PostCObject_DL.
+description: >-
+  SAE J1939 on Linux SocketCAN via Dart FFI. Address claiming, BAM/RTS-CTS
+  transport, DM1 diagnostics, NMEA 2000 Fast Packet, and zero-copy frames.
 version: 0.1.0
-repository: https://github.com/your-org/j1939
+repository: https://github.com/jwinarske/can_dart/tree/main/packages/j1939
+homepage: https://github.com/jwinarske/can_dart
+issue_tracker: https://github.com/jwinarske/can_dart/issues
+topics:
+  - can-bus
+  - j1939
+  - nmea2000
+  - socketcan
+  - ffi
 
 # Dart 3.0 required for:
 #   • Sealed classes (j1939_types.dart)

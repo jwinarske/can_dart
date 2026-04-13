@@ -1,7 +1,27 @@
 // Copyright 2026 Joel Winarske
 // SPDX-License-Identifier: Apache-2.0
 
-// j1939.dart — high-level Dart API for the J1939 Linux stack
+/// SAE J1939 vehicle-bus protocol for Dart on Linux SocketCAN.
+///
+/// This library exposes a single entry point, [J1939Ecu], which manages
+/// one logical ECU on a CAN interface.  Events are delivered as a
+/// [Stream] of [J1939Event] — a sealed class hierarchy that supports
+/// exhaustive `switch` expressions.
+///
+/// ```dart
+/// import 'package:j1939/j1939.dart';
+///
+/// final ecu = J1939Ecu.create(
+///   ifname: 'vcan0', address: 0x80, identityNumber: 0x1234);
+/// ecu.events.listen((e) => switch (e) {
+///   FrameReceived(:final pgn, :final data) => print('$pgn $data'),
+///   AddressClaimed(:final address)         => print('claimed $address'),
+///   AddressClaimFailed()                   => print('claim failed'),
+///   EcuError(:final errorCode)             => print('error $errorCode'),
+///   Dm1Received(:final spn, :final fmi)    => print('DM1 $spn/$fmi'),
+/// });
+/// ```
+library;
 
 import 'dart:async';
 import 'dart:ffi';
@@ -30,6 +50,11 @@ void _ensureApiInitialized() {
 
 // ── J1939Ecu ──────────────────────────────────────────────────────────────────
 
+/// A single J1939 ECU on a Linux SocketCAN interface.
+///
+/// Create instances with [create] or [createFull].  Events (frames,
+/// address-claim results, errors, diagnostics) arrive on [events].
+/// Call [dispose] to release native resources.
 class J1939Ecu {
   J1939Ecu._(this._handle, this._port, Stream<J1939Event> raw) : _events = raw;
 
@@ -42,6 +67,13 @@ class J1939Ecu {
 
   // ── Factory ────────────────────────────────────────────────────────────────
 
+  /// Create an ECU and begin J1939/81 address claiming.
+  ///
+  /// [ifname] is the SocketCAN interface name (e.g. `'vcan0'` or `'can0'`).
+  /// [address] is the preferred source address (0x00–0xFD).
+  /// [identityNumber] is the 21-bit identity portion of the J1939 NAME.
+  ///
+  /// Throws [StateError] if the CAN socket cannot be opened.
   static J1939Ecu create({
     required String ifname,
     required int address,
@@ -299,14 +331,21 @@ class J1939Ecu {
 
   // ── Diagnostics ────────────────────────────────────────────────────────────
 
+  /// Add a DM1 active diagnostic trouble code to this ECU.
+  ///
+  /// Other ECUs can request the fault list via PGN 0xFECA.
   void addDm1Fault({required int spn, required int fmi, int occurrence = 1}) =>
       j1939AddDm1Fault(_handle, spn, fmi, occurrence);
 
+  /// Clear all DM1 faults from this ECU.
   void clearDm1Faults() => j1939ClearDm1Faults(_handle);
 
   // ── State ──────────────────────────────────────────────────────────────────
 
+  /// The current source address of this ECU (0x00–0xFD, or 0xFE if unclaimed).
   int get address => j1939Address(_handle);
+
+  /// Whether this ECU has successfully claimed an address.
   bool get addressClaimed => j1939AddressClaimed(_handle);
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
