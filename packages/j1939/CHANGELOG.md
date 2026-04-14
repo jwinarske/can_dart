@@ -1,3 +1,7 @@
+## 0.1.2
+
+- Use canonical Apache-2.0 text in LICENSE so pana's SPDX detector recognizes it.
+
 ## 0.1.1
 
 - Fix DM1 SPN decode bit-shift in FFI layer (was reading wrong 3 bits).
