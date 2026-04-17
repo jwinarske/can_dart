@@ -288,6 +288,9 @@ J1939Handle* j1939_create(const char* ifname, uint8_t preferred_address,
             const size_t fault_count = (f.data.size() - 2U) / 4U;
             for (size_t i = 0U; i < fault_count; ++i) {
                 const size_t base = 2U + i * 4U;
+                if (base + 3U >= f.data.size()) {
+                    break;
+                }
                 const uint32_t spn =
                     static_cast<uint32_t>(f.data[base]) |
                     (static_cast<uint32_t>(f.data[base + 1U]) << 8U) |
@@ -377,14 +380,11 @@ void j1939_send_async(J1939Handle* handle, int32_t send_id, uint32_t pgn,
         });
 }
 
-J1939Handle* j1939_create_full(const char* ifname, uint8_t preferred_address,
-                               uint32_t identity_number,
-                               uint16_t manufacturer_code,
-                               uint8_t industry_group, uint8_t device_function,
-                               uint8_t device_class, uint8_t function_instance,
-                               uint8_t ecu_instance,
-                               uint8_t vehicle_system_instance,
-                               int64_t event_port_id) {
+J1939Handle* j1939_create_full(
+    const char* ifname, uint8_t preferred_address, uint32_t identity_number,
+    uint16_t manufacturer_code, uint8_t industry_group, uint8_t device_function,
+    uint8_t device_class, uint8_t function_instance, uint8_t ecu_instance,
+    uint8_t vehicle_system_instance, int64_t event_port_id) {
     const Name name {
         .identity_number = identity_number,
         .manufacturer_code = manufacturer_code,
@@ -415,6 +415,9 @@ J1939Handle* j1939_create_full(const char* ifname, uint8_t preferred_address,
             const size_t fault_count = (f.data.size() - 2U) / 4U;
             for (size_t i = 0U; i < fault_count; ++i) {
                 const size_t base = 2U + i * 4U;
+                if (base + 3U >= f.data.size()) {
+                    break;
+                }
                 const uint32_t spn =
                     static_cast<uint32_t>(f.data[base]) |
                     (static_cast<uint32_t>(f.data[base + 1U]) << 8U) |

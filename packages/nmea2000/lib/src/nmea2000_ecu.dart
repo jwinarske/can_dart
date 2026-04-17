@@ -391,7 +391,7 @@ class Nmea2000Ecu {
   }
 
   void _onGroupFunction(FrameReceived frame) {
-    if (frame.data.isEmpty) return;
+    if (_disposed || frame.data.isEmpty) return;
     final code = decodeFunctionCode(frame.data);
     if (code == null) return;
     final targetPgn = decodeTargetPgn(frame.data);

@@ -104,7 +104,9 @@ void Receiver::on_frame(const Id& id, std::span<const uint8_t> data) {
         s.next_frame = 1U;
         s.last_seen = std::chrono::steady_clock::now();
 
-        if (s.total_bytes == 0U) {
+        // Reject payloads exceeding the Fast Packet maximum (223 bytes)
+        // to prevent memory exhaustion from malicious frames.
+        if (s.total_bytes == 0U || s.total_bytes > kMaxPayload) {
             return;
         }
 
@@ -129,6 +131,21 @@ void Receiver::on_frame(const Id& id, std::span<const uint8_t> data) {
             return;
         }
 
+        // Cap session count to prevent resource exhaustion from
+        // malicious flooding. Evict oldest session if at limit.
+        if (sessions_.size() >= 256U) {
+            expire_stale_sessions();
+            if (sessions_.size() >= 256U) {
+                // Still full — drop oldest by last_seen.
+                auto oldest = sessions_.begin();
+                for (auto it = sessions_.begin(); it != sessions_.end(); ++it) {
+                    if (it->second.last_seen < oldest->second.last_seen) {
+                        oldest = it;
+                    }
+                }
+                sessions_.erase(oldest);
+            }
+        }
         sessions_.insert_or_assign(key, std::move(s));
 
     } else {
