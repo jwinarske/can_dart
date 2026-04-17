@@ -2,7 +2,7 @@ name: j1939
 description: >-
   SAE J1939 on Linux SocketCAN via Dart FFI. Address claiming, BAM/RTS-CTS
   transport, DM1 diagnostics, NMEA 2000 Fast Packet, and zero-copy frames.
-version: 0.1.2
+version: 0.1.3
 repository: https://github.com/jwinarske/can_dart/tree/main/packages/j1939
 homepage: https://github.com/jwinarske/can_dart
 issue_tracker: https://github.com/jwinarske/can_dart/issues

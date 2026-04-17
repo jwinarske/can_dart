@@ -33,7 +33,7 @@ jobs:
       - name: dart format
         run: |
           set -e
-          for pkg in packages/can_socket packages/can_dbc packages/can_engine packages/j1939 packages/nmea2000 packages/nmea2000_bus; do
+          for pkg in packages/can_socket packages/can_dbc packages/can_codec packages/can_engine packages/j1939 packages/nmea2000 packages/nmea2000_bus packages/rvc packages/rvc_bus; do
             echo "::group::dart format $pkg"
             (cd "$pkg" && dart pub get --offline 2>/dev/null || dart pub get)
             (cd "$pkg" && dart format --output=none --set-exit-if-changed .)
@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [can_socket, can_dbc, can_engine, j1939, nmea2000, nmea2000_bus]
+        package: [can_socket, can_dbc, can_codec, can_engine, j1939, nmea2000, nmea2000_bus, rvc, rvc_bus]
     defaults:
       run:
         working-directory: packages/${{ matrix.package }}
@@ -75,7 +75,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [can_socket, can_dbc, can_engine, j1939, nmea2000, nmea2000_bus]
+        package: [can_socket, can_dbc, can_codec, can_engine, j1939, nmea2000, nmea2000_bus, rvc, rvc_bus]
     defaults:
       run:
         working-directory: packages/${{ matrix.package }}
@@ -229,7 +229,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: [obdii_monitor, throttle_ui, instrument_display]
+        example: [obdii_monitor, throttle_ui, instrument_display, rv_dashboard]
     defaults:
       run:
         working-directory: examples/${{ matrix.example }}

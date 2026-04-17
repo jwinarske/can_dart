@@ -1,0 +1,22 @@
+name: rvc_bus
+description: >-
+  RV-C bus topology tracker and device registry. Auto-discovers devices,
+  maps function codes to names, and exposes reactive bus events.
+version: 0.1.3
+repository: https://github.com/jwinarske/can_dart/tree/main/packages/rvc_bus
+homepage: https://github.com/jwinarske/can_dart
+issue_tracker: https://github.com/jwinarske/can_dart/issues
+topics:
+  - can-bus
+  - rvc
+  - rv
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  rvc: ^0.1.0
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.25.0

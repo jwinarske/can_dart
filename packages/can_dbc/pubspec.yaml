@@ -1,6 +1,6 @@
 name: can_dbc
 description: Pure Dart DBC file parser and signal compiler for CAN bus databases.
-version: 0.1.2
+version: 0.1.3
 repository: https://github.com/jwinarske/can_dart/tree/main/packages/can_dbc
 homepage: https://github.com/jwinarske/can_dart
 issue_tracker: https://github.com/jwinarske/can_dart/issues

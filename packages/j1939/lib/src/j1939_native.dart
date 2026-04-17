@@ -248,14 +248,14 @@ final bool Function(Pointer<J1939Handle>) j1939AddressClaimed =
 
 // ── NMEA 2000 extensions ────────────────────────────────────────────────────
 
-// Full NAME create — exposes all J1939 NAME fields for NMEA 2000.
+// Full NAME create — exposes all J1939 NAME fields.
 final Pointer<J1939Handle> Function(
-        Pointer<Utf8>, int, int, int, int, int, int, int, int, int)
+        Pointer<Utf8>, int, int, int, int, int, int, int, int, int, int)
     j1939CreateFull = _lib.lookupFunction<
         Pointer<J1939Handle> Function(Pointer<Utf8>, Uint8, Uint32, Uint16,
-            Uint8, Uint8, Uint8, Uint8, Uint8, Int64),
+            Uint8, Uint8, Uint8, Uint8, Uint8, Uint8, Int64),
         Pointer<J1939Handle> Function(Pointer<Utf8>, int, int, int, int, int,
-            int, int, int, int)>('j1939_create_full');
+            int, int, int, int, int)>('j1939_create_full');
 
 // Register a PGN transport type at runtime (0=single, 1=fast_packet, 2=iso_tp).
 final void Function(int, int) nmea2000SetPgnTransport =

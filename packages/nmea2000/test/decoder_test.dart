@@ -6,15 +6,11 @@
 
 import 'dart:typed_data';
 
-import 'package:nmea2000/src/decoder.dart';
-import 'package:nmea2000/src/pgn_definition.dart';
+import 'package:can_codec/can_codec.dart';
 import 'package:nmea2000/src/pgns/mandatory.dart';
 import 'package:nmea2000/src/pgns/navigation.dart';
 import 'package:nmea2000/src/pgns/wind.dart';
 import 'package:test/test.dart';
-
-// Re-import encoder for round-trip tests.
-import 'package:nmea2000/src/encoder.dart';
 
 void main() {
   group('decode unsigned fields', () {

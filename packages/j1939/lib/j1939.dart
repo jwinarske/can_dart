@@ -141,8 +141,8 @@ class J1939Ecu {
 
   /// Create an ECU with full NAME field control.
   ///
-  /// Same as [create] but exposes [deviceFunction], [deviceClass],
-  /// [functionInstance], and [ecuInstance] for NMEA 2000 compliance.
+  /// Same as [create] but exposes all J1939 NAME fields for NMEA 2000
+  /// and RV-C compliance.
   static J1939Ecu createFull({
     required String ifname,
     required int address,
@@ -153,6 +153,7 @@ class J1939Ecu {
     int deviceClass = 0,
     int functionInstance = 0,
     int ecuInstance = 0,
+    int vehicleSystemInstance = 0,
   }) {
     _ensureApiInitialized();
 
@@ -199,6 +200,7 @@ class J1939Ecu {
       deviceClass,
       functionInstance,
       ecuInstance,
+      vehicleSystemInstance,
       port.sendPort.nativePort,
     );
     malloc.free(ifnameC);

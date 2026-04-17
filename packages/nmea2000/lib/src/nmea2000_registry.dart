@@ -1,7 +1,7 @@
 // Copyright 2026 Joel Winarske
 // SPDX-License-Identifier: Apache-2.0
 
-import 'pgn_definition.dart';
+import 'package:can_codec/can_codec.dart';
 import 'pgns/depth_speed.dart';
 import 'pgns/electrical.dart';
 import 'pgns/engine.dart';

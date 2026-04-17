@@ -1,7 +1,7 @@
 // Copyright 2026 Joel Winarske
 // SPDX-License-Identifier: Apache-2.0
 
-/// Field data type for NMEA 2000 signal decoding.
+/// Field data type for CAN message signal decoding.
 enum FieldType {
   unsigned,
   signed,
@@ -12,7 +12,7 @@ enum FieldType {
   reserved,
 }
 
-/// A single field within a PGN payload.
+/// A single field within a message payload.
 class FieldDefinition {
   const FieldDefinition({
     required this.name,
@@ -34,22 +34,22 @@ class FieldDefinition {
   /// Optional lookup table for [FieldType.lookup] fields.
   final Map<int, String>? lookupTable;
 
-  /// NMEA 2000 "data not available" sentinel: all bits set for the field width.
+  /// "Data not available" sentinel: all bits set for the field width.
   int get naSentinel {
     if (bitLength >= 64) return -1; // unsigned overflow protection
     return (1 << bitLength) - 1;
   }
 
-  /// NMEA 2000 "out of range" sentinel: all bits set minus 1.
+  /// "Out of range" sentinel: all bits set minus 1.
   int get oorSentinel => naSentinel - 1;
 
-  /// NMEA 2000 "reserved" sentinel: all bits set minus 2.
+  /// "Reserved" sentinel: all bits set minus 2.
   int get reservedSentinel => naSentinel - 2;
 }
 
-/// Complete definition of an NMEA 2000 PGN.
-class PgnDefinition {
-  const PgnDefinition({
+/// Complete definition of a CAN bus message (PGN in J1939/NMEA 2000/RV-C).
+class MessageDefinition {
+  const MessageDefinition({
     required this.pgn,
     required this.name,
     required this.transport,
@@ -65,7 +65,7 @@ class PgnDefinition {
   final String name;
 
   /// Transport type index: 0=single, 1=fast_packet, 2=iso_tp.
-  /// Matches [PgnTransport.value].
+  /// Matches [TransportType.value].
   final int transport;
 
   /// Expected payload length in bytes.
@@ -74,6 +74,6 @@ class PgnDefinition {
   /// Ordered list of fields in the payload.
   final List<FieldDefinition> fields;
 
-  /// Whether the PGN has a repeating field group at the end.
+  /// Whether the message has a repeating field group at the end.
   final bool repeating;
 }

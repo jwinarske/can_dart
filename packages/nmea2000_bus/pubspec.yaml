@@ -2,7 +2,7 @@ name: nmea2000_bus
 description: >-
   NMEA 2000 bus topology tracker and device registry. Auto-discovers
   devices, tracks online/offline state, and exposes reactive bus events.
-version: 0.1.2
+version: 0.1.3
 repository: https://github.com/jwinarske/can_dart/tree/main/packages/nmea2000_bus
 homepage: https://github.com/jwinarske/can_dart
 issue_tracker: https://github.com/jwinarske/can_dart/issues

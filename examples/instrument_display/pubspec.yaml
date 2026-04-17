@@ -12,6 +12,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  can_codec:
+    path: ../../packages/can_codec
   nmea2000:
     path: ../../packages/nmea2000
   nmea2000_bus:

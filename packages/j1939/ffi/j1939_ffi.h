@@ -147,12 +147,11 @@ J1939_FFI_EXPORT bool j1939_address_claimed(J1939Handle* handle);
 
 // Create an ECU with full NAME field control.
 // Same as j1939_create but accepts all J1939 NAME fields needed for NMEA 2000.
-J1939_FFI_EXPORT J1939Handle*
-j1939_create_full(const char* ifname, uint8_t preferred_address,
-                  uint32_t identity_number, uint16_t manufacturer_code,
-                  uint8_t industry_group, uint8_t device_function,
-                  uint8_t device_class, uint8_t function_instance,
-                  uint8_t ecu_instance, int64_t event_port_id);
+J1939_FFI_EXPORT J1939Handle* j1939_create_full(
+    const char* ifname, uint8_t preferred_address, uint32_t identity_number,
+    uint16_t manufacturer_code, uint8_t industry_group, uint8_t device_function,
+    uint8_t device_class, uint8_t function_instance, uint8_t ecu_instance,
+    uint8_t vehicle_system_instance, int64_t event_port_id);
 
 // ── NMEA 2000 Fast Packet ────────────────────────────────────────────────────
 

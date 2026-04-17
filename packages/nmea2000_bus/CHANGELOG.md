@@ -1,3 +1,6 @@
+## 0.1.3
+
+- Add CI coverage and pubspec_overrides.yaml workflow.
 ## 0.1.2
 
 - Use canonical Apache-2.0 text in LICENSE so pana's SPDX detector recognizes it.
