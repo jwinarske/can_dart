@@ -30,11 +30,22 @@ write_override "$REPO_ROOT/packages/can_engine" \
     can_dbc ../can_dbc
 
 write_override "$REPO_ROOT/packages/nmea2000" \
-    j1939 ../j1939
+    j1939 ../j1939 \
+    can_codec ../can_codec
 
 write_override "$REPO_ROOT/packages/nmea2000_bus" \
     nmea2000 ../nmea2000 \
-    j1939 ../j1939
+    j1939 ../j1939 \
+    can_codec ../can_codec
+
+write_override "$REPO_ROOT/packages/rvc" \
+    j1939 ../j1939 \
+    can_codec ../can_codec
+
+write_override "$REPO_ROOT/packages/rvc_bus" \
+    rvc ../rvc \
+    j1939 ../j1939 \
+    can_codec ../can_codec
 
 # Flutter examples
 write_override "$REPO_ROOT/examples/obdii_monitor" \
@@ -47,4 +58,11 @@ write_override "$REPO_ROOT/examples/throttle_ui" \
 write_override "$REPO_ROOT/examples/instrument_display" \
     nmea2000 ../../packages/nmea2000 \
     nmea2000_bus ../../packages/nmea2000_bus \
-    j1939 ../../packages/j1939
+    j1939 ../../packages/j1939 \
+    can_codec ../../packages/can_codec
+
+write_override "$REPO_ROOT/examples/rv_dashboard" \
+    rvc ../../packages/rvc \
+    rvc_bus ../../packages/rvc_bus \
+    j1939 ../../packages/j1939 \
+    can_codec ../../packages/can_codec
