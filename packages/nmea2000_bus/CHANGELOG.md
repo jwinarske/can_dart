@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Add CI coverage and pubspec_overrides.yaml workflow.
+
 ## 0.1.1
 
 - Add test suite: N2kName 64-bit encoding/decoding with bit-position

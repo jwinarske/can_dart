@@ -1,19 +1,22 @@
 name: rvc
 description: >-
-  RV-C (Recreation Vehicle CAN) protocol layer on top of package:j1939.
-  DGN definitions, command/status helpers, and RvcEcu with RV-C NAME
-  defaults. Based on the freely available RVIA RV-C specification.
-version: 0.1.0
-publish_to: none
+  RV-C protocol layer on package:j1939. DGN definitions, command/status
+  helpers, and RvcEcu with RV-C NAME defaults for recreation vehicles.
+version: 0.1.3
+repository: https://github.com/jwinarske/can_dart/tree/main/packages/rvc
+homepage: https://github.com/jwinarske/can_dart
+issue_tracker: https://github.com/jwinarske/can_dart/issues
+topics:
+  - can-bus
+  - rvc
+  - rv
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
 
 dependencies:
-  j1939:
-    path: ../j1939
-  can_codec:
-    path: ../can_codec
+  j1939: ^0.1.0
+  can_codec: ^0.1.0
 
 executables:
   rvc_demo:

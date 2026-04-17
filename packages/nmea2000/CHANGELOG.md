@@ -1,3 +1,8 @@
+## 0.1.3
+
+- Extract codec to shared `package:can_codec`.
+- Add CI coverage and pubspec_overrides.yaml workflow.
+
 ## 0.1.1
 
 - Add comprehensive test suite: decoder, encoder, sentinels, PGN definitions,
